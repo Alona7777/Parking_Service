@@ -1,25 +1,25 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h2>Parking Sessions</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>License Plate</th>
-                <th>Entry Time</th>
-                <th>Exit Time</th>
-                <th>Total Duration</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for session in sessions %}
-                <tr>
-                    <td>{{ session.vehicle.license_plate }}</td>
-                    <td>{{ session.entry_time }}</td>
-                    <td>{{ session.exit_time|default:"In Progress" }}</td>
-                    <td>{{ session.total_duration }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<h2>Your Parking Sessions</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>License Plate</th>
+            <th>Entry Time</th>
+            <th>Exit Time</th>
+            <th>Total Duration</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+        <tr>
+            <td>{{ session.vehicle.license_plate }}</td>
+            <td>{{ session.entry_time }}</td>
+            <td>{{ session.exit_time|default:"In Progress" }}</td>
+            <td>{{ session.total_duration }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

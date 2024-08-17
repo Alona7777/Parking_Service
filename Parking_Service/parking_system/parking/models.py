@@ -7,7 +7,7 @@ class Vehicle(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.license_plate
+        return f"{self.license_plate} - {self.owner}"
 
 
 class ParkingSession(models.Model):
@@ -17,7 +17,7 @@ class ParkingSession(models.Model):
     total_duration = models.DurationField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.vehicle} - {self.entry_time} to {self.exit_time if self.exit_time else 'In Progress'}"
+        return f"Session for {self.vehicle.license_plate} at {self.entry_time}"
 
     def save(self, *args, **kwargs):
         if self.entry_time and self.exit_time:
