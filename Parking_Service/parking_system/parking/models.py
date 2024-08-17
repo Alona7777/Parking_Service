@@ -31,3 +31,23 @@ class ParkingImage(models.Model):
 
     def __str__(self):
         return self.license_plate if self.license_plate else 'Unknown'
+
+
+class ParkingRate(models.Model):
+    VEHICLE_TYPE_CHOICES = [
+        ('track', 'Track'),
+        ('car', 'Car'),
+        ('motorcycle', 'Motorcycle'),
+        ('yaht', 'Yacht')
+    ]
+
+    vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES, unique=False)
+    rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.get_vehicle_type_display()} - {self.rate_per_hour} per hour"
+
+
+
+
+

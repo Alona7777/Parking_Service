@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
-from .models import Vehicle, ParkingSession, ParkingImage
+from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate
 from .vision import detect_license_plate
 from .forms import ParkingImageForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
 
 
 def home(request):
-    return render(request, 'base.html')
+    rates = ParkingRate.objects.all()
+    return render(request, 'home.html', {'rates': rates})
 
 
 def upload_image(request):
@@ -22,6 +23,20 @@ def upload_image(request):
             image.save()
             return render(request, 'upload_image.html', {'license_plate': license_plate})
     return render(request, 'upload_image.html')
+
+
+@login_required(login_url='login')
+def add_vehicle(request):
+    if request.method == 'POST':
+        form = VehicleForm(request.POST)
+        if form.is_valid():
+            vehicle = form.save(commit=False)
+            vehicle.owner = request.user
+            vehicle.save()
+            return redirect('vehicle_list')
+    else:
+        form = VehicleForm()
+    return render(request, 'add_vehicle.html', {'form': form})
 
 
 @login_required(login_url='login')
@@ -54,4 +69,8 @@ def register(request):
         else:
             form = UserRegisterForm()
         return render(request, 'register.html', {'form': form})
+
+
+
+
 
