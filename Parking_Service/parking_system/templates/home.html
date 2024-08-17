@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Parking Rates</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Vehicle Type</th>
+            <th>Rate per Hour</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rate in rates %}
+        <tr>
+            <td>{{ rate.get_vehicle_type_display }}</td>
+            <td>{{ rate.rate_per_hour }} USD</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -73,6 +73,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'parking_sessions' %}">Parking Sessions</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_vehicle' %}">Add vehicle</a>
+                </li>
             </ul>
             <div class="d-flex">
                 {% if user.is_authenticated %}
