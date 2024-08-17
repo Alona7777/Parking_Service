@@ -47,3 +47,5 @@ class ParkingRate(models.Model):
     def __str__(self):
         return f"{self.get_vehicle_type_display()} - {self.rate_per_hour} per hour"
 
+
+
