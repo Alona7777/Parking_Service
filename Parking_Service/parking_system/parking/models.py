@@ -49,3 +49,5 @@ class ParkingRate(models.Model):
 
 
 
+
+

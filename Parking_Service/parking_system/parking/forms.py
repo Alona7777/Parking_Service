@@ -22,3 +22,5 @@ class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
         fields = ['license_plate']
+
+
