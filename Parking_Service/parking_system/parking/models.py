@@ -5,9 +5,14 @@ from django.contrib.auth.models import User
 class Vehicle(models.Model):
     license_plate = models.CharField(max_length=12, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    vehicle_type = models.CharField(max_length=20, unique=False, default='car')
 
     def __str__(self):
         return f"{self.license_plate} - {self.owner}"
+
+    def get_parking_rate(self):
+        rate = ParkingRate.objects.get(vehicle_type=self.vehicle_type)
+        return rate.rate_per_hour
 
 
 class ParkingSession(models.Model):
