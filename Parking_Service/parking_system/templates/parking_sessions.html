@@ -2,6 +2,7 @@
 
 {% block content %}
 <h2>Your Parking Sessions</h2>
+<a href="{% url 'export_parking_report_csv' %}" class="btn btn-primary">Download Report (CSV)</a>
 <table class="table">
     <thead>
         <tr>
