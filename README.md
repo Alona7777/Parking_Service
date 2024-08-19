@@ -28,7 +28,11 @@
     ```docker compose up -d```
 
 6) Run migration:
-    ```python manage.py makemigrations```
-    ```python manage.py migrate```
+    ```python3 manage.py makemigrations```
+    ```python3 manage.py migrate```
+
+7) Run server
+
+    ```python3 manage.py runserver```
 
 
