@@ -6,6 +6,7 @@ class Vehicle(models.Model):
     license_plate = models.CharField(max_length=12, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=20, unique=False, default='car')
+    is_blocked = models.BooleanField(default=False)  # Поле для блокировки авто
 
     def __str__(self):
         return f"{self.license_plate} - {self.owner}"

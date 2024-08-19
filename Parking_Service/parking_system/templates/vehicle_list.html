@@ -8,13 +8,21 @@
             <tr>
                 <th>License Plate</th>
                 <th>Owner</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             {% for vehicle in vehicles %}
-            <tr>
-                <td>{{ vehicle.license_plate }}</td>
-                <td>{{ vehicle.owner.username }}</td>
+            <tr >
+                <td class="{% if vehicle.is_blocked %}text-danger{% else %}text-success{% endif %}">{{ vehicle.license_plate }}</td>
+                <td class="{% if vehicle.is_blocked %}text-danger{% else %}text-success{% endif %}">{{ vehicle.owner.username}}</td>
+                <td class="{% if vehicle.is_blocked %}text-danger{% else %}text-success{% endif %}">
+                    {% if vehicle.is_blocked %}
+                        <i class="bi bi-lock-fill"></i> <!-- Иконка закрытого замка для заблокированных -->
+                    {% else %}
+                        <i class="bi bi-unlock-fill"></i> <!-- Иконка открытого замка для активных -->
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
