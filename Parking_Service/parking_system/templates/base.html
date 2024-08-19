@@ -9,10 +9,17 @@
     <style>
         /* Фон у стилі парковки */
         body {
-            background-image: url('{% static 'G:\Parking_Service\parking_system\static\images\background.jpg' %}'); /* Замініть на реальний URL зображення */
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-image:
+                url('/static/images/background.jpg'), /* Масштабована картинка */
+                url('/static/images/static-background.jpg'); /* Статична картинка */
+            background-repeat: no-repeat, no-repeat; /* Обидві картинки не повторюються */
+            background-position: center 60px, center 60px; /* Позиціонування: масштабована з відступом зверху, статична по центру */
+            background-attachment: scroll, fixed; /* Масштабована картинка рухається, статична фіксована */
+            background-size: contain, cover; /* Масштабована адаптується, статична покриває весь екран */
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
         }
 
         /* Стилі навігації */
@@ -75,6 +82,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'add_vehicle' %}">Add vehicle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'find_vehicle' %}">Find Vehicle</a>
                 </li>
             </ul>
             <div class="d-flex">
