@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Parking Spots Status</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Spot Number</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Occupied By</th>
+                <th>Occupied Since</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for spot in spots %}
+            <tr>
+                <td>{{ spot.number }}</td>
+                <td>{{ spot.get_spot_type_display }}</td>
+                <td>{% if spot.is_occupied %}Occupied{% else %}Free{% endif %}</td>
+                <td>{% if spot.is_occupied %}{{ spot.occupied_by.license_plate }}{% else %}{% endif %}</td>
+                <td>{% if spot.is_occupied %}{{ spot.occupied_since }}{% else %}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

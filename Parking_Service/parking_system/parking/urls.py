@@ -10,6 +10,11 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
     path('find_vehicle/', views.find_vehicle, name='find_vehicle'),
+    path('vehicle_entry', views.start_parking_session, name='vehicle_entry'),
+    path('vehicle_exit', views.end_parking_session, name='vehicle_exit'),
+    path('start_parking/<int:vehicle_id>/', views.start_parking_session, name='start_parking_session'),
+    path('end_parking/<int:vehicle_id>/', views.end_parking_session, name='end_parking_session'),
+    path('parking_status/', views.parking_status, name='parking_status'),
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
 
 ]
