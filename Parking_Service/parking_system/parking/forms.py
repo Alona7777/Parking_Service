@@ -1,5 +1,5 @@
 from django import forms
-from .models import ParkingImage, Vehicle
+from .models import ParkingImage, Vehicle, ParkingSession
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -51,3 +51,47 @@ class VehicleSearchForm(forms.Form):
         # Убираем пробелы, тире и приводим к верхнему регистру
         cleaned_license_plate = license_plate.upper().replace(" ", "").replace("-", "")
         return cleaned_license_plate
+
+
+class StartParkingSessionForm(forms.Form):
+    vehicle = forms.ModelChoiceField(
+        queryset=Vehicle.objects.filter(
+            id__in=Vehicle.objects.exclude(
+                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+            )
+        ).distinct(),
+        label="Vehicle"
+    )
+    entry_time = forms.DateTimeField(
+        label="Entry Time",
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Переопределяем метод __init__ чтобы фильтровать автомобили
+        super().__init__(*args, **kwargs)
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(
+            id__in=Vehicle.objects.exclude(
+                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+            )
+        ).distinct()
+
+
+class EndParkingSessionForm(forms.Form):
+    vehicle = forms.ModelChoiceField(
+        queryset=Vehicle.objects.filter(
+            id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+        ).distinct(),
+        label="Vehicle"
+    )
+    exit_time = forms.DateTimeField(
+        label="Exit Time",
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Переопределяем метод __init__ чтобы фильтровать автомобили
+        super().__init__(*args, **kwargs)
+        self.fields['vehicle'].queryset = Vehicle.objects.filter(
+            id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+        ).distinct()

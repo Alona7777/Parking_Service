@@ -3,21 +3,23 @@ import numpy as np
 import csv
 from decimal import Decimal
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate
-# from .vision import get_plates
-# from .forms import ParkingImageForm
-# from .vision import detect_license_plate, get_plates
-from .forms import ParkingImageForm, VehicleSearchForm
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate, ParkingSpot
+from .vision import detect_license_plate
+from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Replace, Trim, Upper
 from django.db.models import Value
+
+from django.utils import timezone
+
 from .vision import detect_and_recognize_license_plates
 import base64
-
 
 
 def home(request):
@@ -193,3 +195,82 @@ def find_vehicle(request):
             result = None
 
     return render(request, 'find_nomer.html', {'form': form, 'result': result})
+
+
+def start_parking_session(request):
+    if request.method == "POST":
+        form = StartParkingSessionForm(request.POST)
+        if form.is_valid():
+            vehicle = form.cleaned_data['vehicle']
+            entry_time = form.cleaned_data['entry_time']
+
+            # Логика для поиска парковочного места
+            if vehicle.subscription_end_date and vehicle.subscription_end_date >= timezone.now().date():
+                if vehicle.parking_spot_id:
+                    spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                else:
+                    spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
+
+            elif vehicle.is_disabled:
+                spot = ParkingSpot.objects.filter(spot_type='DISABLED', is_occupied=False).first()
+                if not spot:
+                    spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+            else:
+                spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+
+            if spot:
+                spot.is_occupied = True
+                spot.occupied_by = vehicle
+                spot.occupied_since = entry_time
+                spot.save()
+
+                session = ParkingSession(vehicle=vehicle, parking_spot=spot, entry_time=entry_time)
+                session.save()
+                vehicle.parking_spot = spot
+                vehicle.save()
+
+                return redirect('parking_status')
+            else:
+                return render(request, 'no_parking_spots.html')
+    else:
+        form = StartParkingSessionForm()
+
+    return render(request, 'vehicle_entry.html', {'form': form})
+
+
+def end_parking_session(request):
+    if request.method == "POST":
+        form = EndParkingSessionForm(request.POST)
+        if form.is_valid():
+            vehicle = form.cleaned_data['vehicle']
+            exit_time = form.cleaned_data['exit_time']
+
+            session = ParkingSession.objects.filter(vehicle=vehicle, exit_time__isnull=True).first()
+
+            if session:
+                session.exit_time = exit_time
+                session.save()
+
+                # Освобождаем парковочное место
+                spot = session.parking_spot
+                if spot:
+                    spot.is_occupied = False
+                    spot.occupied_by = None
+                    spot.occupied_since = None
+                    spot.save()
+
+                if not (vehicle.subscription_end_date and vehicle.subscription_end_date >= exit_time.date()):
+                    vehicle.parking_spot = None
+
+                vehicle.save()
+
+            return redirect('parking_status')
+    else:
+        form = EndParkingSessionForm()
+
+    return render(request, 'vehicle_exit.html', {'form': form})
+
+
+def parking_status(request):
+    spots = ParkingSpot.objects.all().order_by('number')
+    return render(request, 'parking_status.html', {'spots': spots})
