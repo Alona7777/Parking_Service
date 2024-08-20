@@ -7,6 +7,9 @@
 
 ### Get started
 
+
+нужно добавить информацию о том как установить тессаракт
+
 1) Clone repository:
 
     ```https://github.com/Alona7777/Final_project```
@@ -26,6 +29,8 @@
 5) Run docker compose:
 
     ```docker compose up -d```
+    docker compose up --build -d 
+
 
 6) Run migration:
     ```python3 manage.py makemigrations```
