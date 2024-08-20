@@ -15,10 +15,15 @@
             <td>{{ rate.get_vehicle_type_display }}</td>
             <td>{{ rate.rate_per_hour }} USD</td>
         </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No rates available</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
 {% endblock %}
+
 
 
 

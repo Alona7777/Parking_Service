@@ -1,17 +1,25 @@
+import cv2
+import numpy as np
 import csv
 from decimal import Decimal
 from django.http import HttpResponse
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate, ParkingSpot
 from .vision import detect_license_plate
 from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Replace, Trim, Upper
 from django.db.models import Value
+
 from django.utils import timezone
+
+from .vision import detect_and_recognize_license_plates
+import base64
 
 
 def home(request):
@@ -23,12 +31,38 @@ def upload_image(request):
     if request.method == 'POST':
         form = ParkingImageForm(request.POST, request.FILES)
         if form.is_valid():
-            image = form.save()
-            license_plate = detect_license_plate(image.image.path)
-            image.license_plate = license_plate
-            image.save()
-            return render(request, 'upload_image.html', {'license_plate': license_plate})
-    return render(request, 'upload_image.html')
+            image_file = form.cleaned_data['image']
+            nparr = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Используем функцию из vision.py
+            license_plates, annotated_image = detect_and_recognize_license_plates(img)
+            combined_plates = ', '.join(license_plates)
+
+            # Кодирование изображения в Base64
+            _, buffer = cv2.imencode('.jpg', annotated_image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+            return render(request, 'upload_image.html', {
+                'license_plate': combined_plates,
+                'annotated_image_base64': image_base64
+            })
+    else:
+        form = ParkingImageForm()
+
+    return render(request, 'upload_image.html', {'form': form})
+
+# def upload_image(request):
+#     if request.method == 'POST':
+#         form = ParkingImageForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             image_file = form.cleaned_data['image']
+#             nparr = np.frombuffer(image_file.read(), np.uint8)
+#             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#             license_plates = get_plates(img)
+#             combined_plates = ' '.join(license_plates)
+#             return render(request, 'upload_image.html', {'license_plate': combined_plates})
+#     return render(request, 'upload_image.html', {'form': ParkingImageForm()})
 
 
 @login_required(login_url='login')
@@ -67,7 +101,7 @@ def vehicle_list(request):
 
 @login_required(login_url='login')
 def export_parking_report_csv(request):
-    response = HttpResponse(content_type='csv')
+    response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="parking_report.csv"'
 
     writer = csv.writer(response)
@@ -81,7 +115,12 @@ def export_parking_report_csv(request):
     for session in sessions:
         if session.total_duration is not None:
             duration_in_hours = Decimal(session.total_duration.total_seconds()) / Decimal(3600)
-            rate = session.vehicle.get_parking_rate()
+            try:
+                rate = session.vehicle.get_parking_rate()
+            except ParkingRate.DoesNotExist:
+                rate = Decimal('0.00')
+                print(f"Warning: No parking rate found for vehicle type '{session.vehicle.vehicle_type}'.")
+
             cost = duration_in_hours * rate
 
             writer.writerow([

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -19,20 +21,32 @@ class ParkingSpot(models.Model):
         return f"Spot {self.number} ({self.get_spot_type_display()})"
 
 class Vehicle(models.Model):
+    VEHICLE_TYPE_CHOICES = [
+        ('car', 'Car'),
+        ('motorcycle', 'Motorcycle'),
+        ('bus', 'Bus'),
+        ('truck', 'Truck'),
+        ('yacht', 'Yacht'),
+    ]
+
     license_plate = models.CharField(max_length=12, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    vehicle_type = models.CharField(max_length=20, default='car')
-    is_blocked = models.BooleanField(default=False)
+    vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES)
+    is_blocked = models.BooleanField(default=False)   # Поле для блокировки авто
     parking_spot = models.ForeignKey(ParkingSpot, null=True, blank=True, on_delete=models.SET_NULL)
     subscription_end_date = models.DateField(null=True, blank=True)
     is_disabled = models.BooleanField(default=False)  # Флаг принадлежности инвалиду
+    
 
     def __str__(self):
-        return f"{self.license_plate} - {self.owner}"
+        return f"{self.license_plate} - {self.owner} - {self.vehicle_type}"
 
     def get_parking_rate(self):
-        rate = ParkingRate.objects.get(vehicle_type=self.vehicle_type)
-        return rate.rate_per_hour
+        try:
+            rate = ParkingRate.objects.get(vehicle_type=self.vehicle_type)
+            return rate.rate_per_hour
+        except ParkingRate.DoesNotExist:
+            return Decimal('0.00')
 
 class ParkingSession(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
@@ -58,14 +72,15 @@ class ParkingImage(models.Model):
 
 
 class ParkingRate(models.Model):
-    VEHICLE_TYPE_CHOICES = [
-        ('track', 'Track'),
+    vehicle_type = models.CharField(max_length=20, unique=True, choices=[
         ('car', 'Car'),
         ('motorcycle', 'Motorcycle'),
-        ('yaht', 'Yacht')
-    ]
+        ('bus', 'Bus'),
+        ('truck', 'Truck'),
+        ('yacht', 'Yacht'),
+    ])
 
-    vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES, unique=False)
+    # vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES, unique=False)
     rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
