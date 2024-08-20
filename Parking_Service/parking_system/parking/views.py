@@ -99,7 +99,7 @@ def vehicle_list(request):
 
 @login_required(login_url='login')
 def export_parking_report_csv(request):
-    response = HttpResponse(content_type='csv')
+    response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="parking_report.csv"'
 
     writer = csv.writer(response)
@@ -113,7 +113,12 @@ def export_parking_report_csv(request):
     for session in sessions:
         if session.total_duration is not None:
             duration_in_hours = Decimal(session.total_duration.total_seconds()) / Decimal(3600)
-            rate = session.vehicle.get_parking_rate()
+            try:
+                rate = session.vehicle.get_parking_rate()
+            except ParkingRate.DoesNotExist:
+                rate = Decimal('0.00')
+                print(f"Warning: No parking rate found for vehicle type '{session.vehicle.vehicle_type}'.")
+
             cost = duration_in_hours * rate
 
             writer.writerow([
