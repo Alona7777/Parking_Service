@@ -1,9 +1,13 @@
+import cv2
+import numpy as np
 import csv
 from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate
-from .vision import detect_license_plate
+# from .vision import get_plates
+# from .forms import ParkingImageForm
+from .vision import detect_license_plate, get_plates
 from .forms import ParkingImageForm, VehicleSearchForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -18,17 +22,31 @@ def home(request):
     return render(request, 'home.html', {'rates': rates})
 
 
+# def upload_image(request):
+#     if request.method == 'POST':
+#         form = ParkingImageForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             image = form.cleaned_data['image']
+#             # image = form.save()
+#             license_plate = detect_license_plate(image)
+#             combined_plates = ' '.join(license_plate)
+#             # image.license_plate = license_plate
+#             # image.save()
+#             return render(request, 'upload_image.html', {'license_plate': combined_plates })
+#     return render(request, 'upload_image.html')
+
+
 def upload_image(request):
     if request.method == 'POST':
         form = ParkingImageForm(request.POST, request.FILES)
         if form.is_valid():
-            image = form.save()
-            license_plate = detect_license_plate(image.image.path)
-            image.license_plate = license_plate
-            image.save()
-            return render(request, 'upload_image.html', {'license_plate': license_plate})
-    return render(request, 'upload_image.html')
-
+            image_file = form.cleaned_data['image']
+            nparr = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            license_plates = get_plates(img)
+            combined_plates = ' '.join(license_plates)
+            return render(request, 'upload_image.html', {'license_plate': combined_plates})
+    return render(request, 'upload_image.html', {'form': ParkingImageForm()})
 
 @login_required(login_url='login')
 def add_vehicle(request):
