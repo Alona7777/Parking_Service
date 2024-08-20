@@ -40,7 +40,8 @@ class UserRegisterForm(UserCreationForm):
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['license_plate']
+        fields = ['license_plate', 'vehicle_type']
+
 
 class VehicleSearchForm(forms.Form):
     license_plate = forms.CharField(max_length=12, label='License Plate')
@@ -50,4 +51,3 @@ class VehicleSearchForm(forms.Form):
         # Убираем пробелы, тире и приводим к верхнему регистру
         cleaned_license_plate = license_plate.upper().replace(" ", "").replace("-", "")
         return cleaned_license_plate
-      
