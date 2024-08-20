@@ -10,9 +10,15 @@
         </div>
         <button type="submit" class="btn btn-primary">Upload</button>
     </form>
+
     {% if license_plate %}
         <div class="alert alert-success mt-3" role="alert">
             Recognized License Plate: {{ license_plate }}
         </div>
+    {% endif %}
+
+    {% if annotated_image_base64 %}
+        <h3>Annotated Image:</h3>
+        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Annotated Image" class="img-fluid mt-3">
     {% endif %}
 {% endblock %}

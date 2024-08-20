@@ -1,71 +1,51 @@
-from django.shortcuts import render
-from .forms import ParkingImageForm
+from paddleocr import PaddleOCR
+from ultralytics import YOLO
 import cv2
 import numpy as np
-import pytesseract
-from ultralytics import YOLO
-import re
 
-
-# Укажите путь к Tesseract
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
-
-# Загрузка обученной модели YOLO
+# Инициализация OCR и модели YOLO
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
 model = YOLO('best.pt')
 
-def detect_plates(src):
-    predictions = model.predict(src, verbose=False)
-    results = []
+def detect_and_recognize_license_plates(image):
+    # Применение YOLO для детекции
+    results = model.predict(image)
 
-    for prediction in predictions:
-        for box in prediction.boxes:
-            det_confidence = box.conf.item()
-            if det_confidence < 0.6:
-                continue
-            coords = [int(position) for position in (box.xyxy.view(1, 4)).tolist()[0]]
-            results.append(coords)
+    recognized_texts = []
+    annotated_image = image.copy()
 
-    return results
+    # Применение OCR к каждому найденному bounding box
+     # Проверка на наличие детекций
+    if results and len(results) > 0:
+        for result in results:
+            boxes = result.boxes
+            for box in boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0].tolist()[:4])
+                cropped_image = image[y1:y2, x1:x2]
 
-def crop(img, coords):
-    cropped = img[coords[1]:coords[3], coords[0]:coords[2]]
-    return cropped
+                # Применение OCR к региону интереса
+                ocr_result = ocr.ocr(cropped_image, cls=True)
+                # Обработка результатов OCR
+                for line in ocr_result:
+                    if line:
+                        for word_info in line:
+                            recognized_texts.append(word_info[1][0])
 
-def preprocess_image(img):
-    normalize = cv2.normalize(img, np.zeros((img.shape[0], img.shape[1])), 0, 255, cv2.NORM_MINMAX)
-    denoise = cv2.fastNlMeansDenoisingColored(normalize, h=10, hColor=10, templateWindowSize=7, searchWindowSize=15)
-    grayscale = cv2.cvtColor(denoise, cv2.COLOR_BGR2GRAY)
-    threshold = cv2.threshold(grayscale, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-    return threshold
+                            # Аннотирование изображения (опционально)
+                            cv2.rectangle(annotated_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                            cv2.putText(annotated_image, word_info[1][0], (x1, y1 - 10),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                    else:
+                        text = "Not recognized"
+                        recognized_texts.append(text)
+                        cv2.rectangle(annotated_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.putText(annotated_image, text, (x1, y1 - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-def ocr_plate(src):
-    preprocessed = preprocess_image(src)
-    custom_config = r'--oem 3 --psm 8'
-    text = pytesseract.image_to_string(preprocessed, config=custom_config)
-    plate_text_filtered = re.sub(r"[^A-Z0-9- ]", "", text).strip("- ")
-    return plate_text_filtered
-
-def ocr_plates(src, det_predictions):
-    results = []
-
-    for det_prediction in det_predictions:
-        plate_region = crop(src, det_prediction)
-        plate_text = ocr_plate(plate_region)
-        results.append(plate_text)
-
-    return results
-
-def get_plates(src):
-    det_predictions = detect_plates(src)
-    ocr_predictions = ocr_plates(src, det_predictions)
+        return recognized_texts, annotated_image
     
-    return ocr_predictions
-
-
-
-
-
-
+    else:
+        return "No license plates detected."
 
 
 
@@ -110,7 +90,7 @@ def get_plates(src):
 #                     recognized_numbers.append(text)
 
 #         # Возвращаем распознанные номера в одну строку
-#         print(recognized_numbers)
+
 #     return recognized_numbers if recognized_numbers else ["No license plates detected."]
 
 # def preprocess_image(image):
@@ -140,6 +120,5 @@ def get_plates(src):
 #     config = '--oem 3 --psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 #     text = pytesseract.image_to_string(image, config=config)
 #     return text.strip()
-
 
 

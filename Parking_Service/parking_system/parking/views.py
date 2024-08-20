@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate
 # from .vision import get_plates
 # from .forms import ParkingImageForm
-from .vision import detect_license_plate, get_plates
+# from .vision import detect_license_plate, get_plates
 from .forms import ParkingImageForm, VehicleSearchForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -15,25 +15,14 @@ from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Replace, Trim, Upper
 from django.db.models import Value
+from .vision import detect_and_recognize_license_plates
+import base64
+
 
 
 def home(request):
     rates = ParkingRate.objects.all()
     return render(request, 'home.html', {'rates': rates})
-
-
-# def upload_image(request):
-#     if request.method == 'POST':
-#         form = ParkingImageForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             image = form.cleaned_data['image']
-#             # image = form.save()
-#             license_plate = detect_license_plate(image)
-#             combined_plates = ' '.join(license_plate)
-#             # image.license_plate = license_plate
-#             # image.save()
-#             return render(request, 'upload_image.html', {'license_plate': combined_plates })
-#     return render(request, 'upload_image.html')
 
 
 def upload_image(request):
@@ -43,10 +32,36 @@ def upload_image(request):
             image_file = form.cleaned_data['image']
             nparr = np.frombuffer(image_file.read(), np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            license_plates = get_plates(img)
-            combined_plates = ' '.join(license_plates)
-            return render(request, 'upload_image.html', {'license_plate': combined_plates})
-    return render(request, 'upload_image.html', {'form': ParkingImageForm()})
+
+            # Используем функцию из vision.py
+            license_plates, annotated_image = detect_and_recognize_license_plates(img)
+            combined_plates = ', '.join(license_plates)
+
+            # Кодирование изображения в Base64
+            _, buffer = cv2.imencode('.jpg', annotated_image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+            return render(request, 'upload_image.html', {
+                'license_plate': combined_plates,
+                'annotated_image_base64': image_base64
+            })
+    else:
+        form = ParkingImageForm()
+
+    return render(request, 'upload_image.html', {'form': form})
+
+# def upload_image(request):
+#     if request.method == 'POST':
+#         form = ParkingImageForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             image_file = form.cleaned_data['image']
+#             nparr = np.frombuffer(image_file.read(), np.uint8)
+#             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#             license_plates = get_plates(img)
+#             combined_plates = ' '.join(license_plates)
+#             return render(request, 'upload_image.html', {'license_plate': combined_plates})
+#     return render(request, 'upload_image.html', {'form': ParkingImageForm()})
+
 
 @login_required(login_url='login')
 def add_vehicle(request):
