@@ -9,6 +9,7 @@ urlpatterns = [
     path('sessions/', views.parking_sessions, name='parking_sessions'),
     path('register/', views.register, name='register'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
+    path('find_vehicle/', views.find_vehicle, name='find_vehicle'),
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
 
 ]

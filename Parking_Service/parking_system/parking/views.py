@@ -5,12 +5,16 @@ from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate
-from .vision import get_plates
-from .forms import ParkingImageForm
+# from .vision import get_plates
+# from .forms import ParkingImageForm
+from .vision import detect_license_plate, get_plates
+from .forms import ParkingImageForm, VehicleSearchForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Replace, Trim, Upper
+from django.db.models import Value
 
 
 def home(request):
@@ -51,8 +55,19 @@ def add_vehicle(request):
         if form.is_valid():
             vehicle = form.save(commit=False)
             vehicle.owner = request.user
-            vehicle.save()
-            return redirect('vehicle_list')
+
+            # Проверка уникальности номера
+            cleaned_plate = form.cleaned_data['license_plate'].replace(" ", "").replace("-", "").upper()
+            existing_vehicles = Vehicle.objects.annotate(
+                cleaned_license_plate=Trim(
+                    Replace(Replace(Upper('license_plate'), Value(" "), Value("")), Value("-"), Value("")))
+            ).filter(cleaned_license_plate=cleaned_plate)
+
+            if existing_vehicles.exists():
+                form.add_error('license_plate', 'This license plate is already registered.')
+            else:
+                vehicle.save()
+                return redirect('vehicle_list')
     else:
         form = VehicleForm()
     return render(request, 'add_vehicle.html', {'form': form})
@@ -130,3 +145,31 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+def find_vehicle(request):
+    form = VehicleSearchForm(request.GET or None)
+    result = None
+
+    if form.is_valid():
+        cleaned_query_plate = form.cleaned_data['license_plate']
+
+        # Очистка и форматирование номеров в базе данных
+        cleaned_vehicles = Vehicle.objects.annotate(
+            cleaned_license_plate=Trim(
+                Replace(Replace(Upper('license_plate'), Value(" "), Value("")), Value("-"), Value("")))
+        ).select_related('owner')
+
+        try:
+            # Поиск автомобиля по очищенному номеру
+            vehicle = cleaned_vehicles.get(cleaned_license_plate=cleaned_query_plate)
+            result = {
+                'license_plate': vehicle.license_plate,
+                'vehicle_type': vehicle.vehicle_type,
+                'owner_id': vehicle.owner.id,
+                'username': vehicle.owner.username,
+                'first_name': vehicle.owner.first_name,
+                'last_name': vehicle.owner.last_name,
+            }
+        except Vehicle.DoesNotExist:
+            result = None
+
+    return render(request, 'find_nomer.html', {'form': form, 'result': result})
