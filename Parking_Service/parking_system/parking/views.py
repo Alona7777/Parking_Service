@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate, ParkingSpot
-from .vision import detect_license_plate
+# from .vision import detect_license_plate
 from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
 
 from django.contrib.auth.forms import UserCreationForm
