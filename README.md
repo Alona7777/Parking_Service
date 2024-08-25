@@ -1,191 +1,158 @@
 # Parking Management System
 
-## Опис
+## Description
 
-Цей проект є системою управління паркуванням, яка дозволяє автоматично визначати номера автомобільних знаків на зображеннях, відстежувати тривалість паркування для кожного унікального транспортного засобу та розраховувати накопичені паркувальні витрати. Система включає функції управління обліковими записами користувачів, можливість додавання та видалення транспортних засобів, а також генерацію звітів про паркування.
+This project is a parking management system that automatically identifies vehicle license plate numbers from images, tracks parking duration for each unique vehicle, and calculates accumulated parking costs. The system includes user account management features, the ability to add and remove vehicles, and generates parking reports.
 
-## Функціональність
+## License Plate Recognition Technologies
 
-- **Управління користувачами**: Адміністратор може додавати або видаляти користувачів, блокувати транспортні засоби.
-- **Розпізнавання номерних знаків**: Система використовує комп'ютерний зір для автоматичного розпізнавання номерів транспортних засобів.
-- **Відстеження часу паркування**: Автоматичний підрахунок часу паркування для кожного транспортного засобу.
-- **Розрахунок вартості паркування**: Система розраховує вартість паркування на основі типу транспортного засобу.
-- **Генерація звітів**: Можливість експорту звітів у форматі CSV для адміністратора.
+For efficient detection and recognition of vehicle license plates, our project uses advanced computer vision technologies:
 
-## Вимоги
+1. **License Plate Detection**: The YOLOv8s (You Only Look Once version 8 small) model is used to detect the location of license plates in images. This model provides fast and accurate identification of the area where the license plate is located in a vehicle photograph.
 
-- Python 3.8 або вище
-- Django 3.2 або вище
+![License Plate Detection](Parking_Service/parking_system/media/img_readme/IMG_0816.jpg)
+
+2. **License Plate Text Recognition**: After detecting the license plate, PaddleOCR is used to recognize the actual text of the plate number. This powerful Optical Character Recognition (OCR) library allows for accurate reading of text from the highlighted license plate area.
+
+![License Plate Text Recognition](Parking_Service/parking_system/media/img_readme/IMG_0817.jpeg)
+
+The combination of these two technologies ensures high accuracy and efficiency in the process of automatic vehicle number identification, which is a key component of our parking management system.
+
+![License Plate Text Recognition in Darkness](Parking_Service/parking_system/media/img_readme/IMG_0815.jpg)
+
+## Functionality
+
+- **User Management**: The administrator can add or remove users, block vehicles.
+- **License Plate Recognition**: The system uses computer vision for automatic recognition of vehicle numbers.
+- **Parking Time Tracking**: Automatic calculation of parking time for each vehicle.
+- **Parking Cost Calculation**: The system calculates parking costs based on the vehicle type.
+- **Report Generation**: Ability to export reports in CSV format for the administrator.
+
+## Requirements
+
+- Python 3.11 or higher
+- Django 3.5 or higher
 - PostgreSQL
-- PaddlePaddle (для розпізнавання номерних знаків)
-- Інші залежності вказані у файлі `pyproject.toml` або `requirements.txt`
+- PaddlePaddle (for license plate recognition)
+- Other dependencies listed in `pyproject.toml` or `requirements.txt`
 
-## Встановлення
+# Application Setup
 
-### Встановлення через Conda
+## Setting Up Virtual Environment
 
-1. **Клонування репозиторію**
+### 1. Installation via Conda
 
-   ```bash
-   git clone https://github.com/yourusername/parking-management-system.git
-   cd parking-management-system
+   - 1. **Clone the repository**
 
+      ```bash
+      git clone https://github.com/yourusername/parking-management-system.git
+      cd parking-management-system
+      ```
 
-## Створення та активація віртуального середовища
+   - 2. **Create and activate virtual environment**
 
-Використовуючи Conda:
+      Using Conda:
 
-- conda create -n parking-system python=3.11
-- conda activate parking-system
-- pip install -r requirements.txt
+      - ```conda create -n parking-system python=3.11```
+      - ```conda activate parking-system```
+      - ```pip install -r requirements.txt```
 
+### 2. Installation via Poetry
+   - 1. **Install Poetry (if not already installed)**
 
-## 1. Встановлення через Poetry
-### Встановлення Poetry (якщо ще не встановлений)
+      - On Linux and macOS:
 
-На системах Linux і macOS:
+      ```curl -sSL https://install.python-poetry.org | python3 -```
 
-- curl -sSL https://install.python-poetry.org | python3 -
+      -  On Windows:
 
-### На Windows:
+      ```Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -```
 
-- (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+      - Add Poetry to your PATH:
 
-## Додайте Poetry до вашого PATH:
+      ```export PATH="$HOME/.local/bin:$PATH"```
 
-- export PATH="$HOME/.local/bin:$PATH"
+   - 2. **Clone the repository**
 
-## 2. Клонування репозиторію
+      - ```git clone https://github.com/yourusername/parking-management-system.git```
+      - ```cd parking-management-system```
 
-- git clone https://github.com/yourusername/parking-management-system.git
-- cd parking-management-system
+   - 3. **Install dependencies via Poetry**
 
-## 3. Встановлення залежностей через Poetry
+      ```poetry install```
 
-- poetry install
+   - 4. **Activate virtual environment**
 
-## 4. Активація віртуального середовища
+      ```poetry shell```
 
-- poetry shell
+### 3. Installation via VENV
 
+   - 1. ```python3 -m venv venv```
+   - 2. ```source venv/bin/activate```
+   - 3. ```pip install -r requirements.txt```
 
+### Additional Instructions for Linux
 
-### Додаткові інструкції для Linux, macOS та Windows
-Linux
-## 1. Переконайтеся, що у вас встановлені всі необхідні пакети для компіляції Python-залежностей:
+   - 1. Make sure you have all necessary packages installed for compiling Python dependencies:
+      - ```sudo apt-get update```
+      - ```sudo apt-get install build-essential libssl-dev libffi-dev python3-dev```
 
-- sudo apt-get update
-- sudo apt-get install build-essential libssl-dev libffi-dev python3-dev
+## Database Setup:
 
-## 2. Встановлення Tesseract OCR:
+1. Use ```example.env``` to create your own ```.env```
 
-- sudo apt-get install tesseract-ocr
+2. Use psql to create a PostgreSQL database and user.
 
+3. After installing dependencies, perform database migrations:
 
-## 3. Налаштування бази даних:
+   - ```python manage.py makemigrations```
+   - ```python manage.py migrate```
 
-Використовуйте psql для створення бази даних PostgreSQL та користувача.
+3. Create a superuser
 
+   - ```python manage.py createsuperuser```
 
-### macOS
+### Starting the Server
 
-## 1. Встановлення Homebrew (якщо ще не встановлений):
+1.  Navigate to the ```parking_system``` directory:  
 
-- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```cd``` and your path to the ```parking_system``` directory
 
-## 2. Встановлення Tesseract OCR через Homebrew:
+2. Run the server: 
 
-- brew install tesseract
+   - ```python manage.py runserver```
 
 
-### 3. Налаштування бази даних:
+# Usage Instructions
 
-- Використовуйте psql для створення бази даних PostgreSQL та користувача.
+##  Authorization
 
+- Go to http://127.0.0.1:8000/admin/ and log in with the superuser account created during setup.
 
-### Windows
+- User and Vehicle Management
 
-- Переконайтеся, що у вас встановлений Windows Subsystem for Linux (WSL), якщо ви плануєте використовувати Linux-середовище на Windows.
+- Add new users and vehicles through the admin panel.
 
-- Встановлення Tesseract OCR:
+- Uploading Images for License Plate Recognition
 
-- Завантажте і встановіть Tesseract OCR для Windows.
+- Users can upload images of their vehicles, and the system will automatically recognize the license plate and calculate parking time.
 
-## Налаштування бази даних:
+- Report Generation
 
-Використовуйте інструмент командного рядка або GUI (наприклад, pgAdmin) для створення бази даних PostgreSQL та користувача.
+- The administrator can generate a parking report and download it in CSV format through the appropriate interface.
 
+##  Adding a New Vehicle
 
+- Go to the vehicle addition page.
+- Fill out the form, selecting the vehicle type from the list (Car, Truck, Motorcycle, Yacht).
+- Save the vehicle.
+- Viewing Parking Sessions
 
-### Міграція бази даних
+- Authorized users can view their parking sessions.
+- The administrator can view all parking sessions.
+- Exporting Reports to CSV
 
-## Після встановлення залежностей виконайте міграції бази даних:
+- The administrator can generate a parking report for a specific period and export it in CSV format.
 
-- python manage.py makemigrations
-- python manage.py migrate
-
-
-### Створення суперкористувача
-
-- python manage.py createsuperuser
-
-
-### Запуск сервера
-
--python manage.py runserver
-
-
-########################################################################################################################
-
-
-Встановлення Tesseract OCR (для розпізнавання тексту)
-Завантажте та встановіть Tesseract OCR відповідно до вашої операційної системи:
-
-Tesseract OCR Installation Guide (https://github.com/tesseract-ocr/tesseract)
-
-
-########################################################################################################################
-
-
-### Використання
-
-##  Авторизація
-
-- Перейдіть за адресою http://127.0.0.1:8000/admin/ і увійдіть під обліковим записом суперкористувача, створеним на етапі налаштування.
-
-- Управління користувачами та транспортними засобами
-
-- Додавайте нових користувачів і транспортні засоби через адмін-панель.
-
-- Завантаження зображень для розпізнавання номерів
-
-- Користувачі можуть завантажувати зображення своїх транспортних засобів, і система автоматично розпізнає номерний знак та обчислить час паркування.
-
-- Генерація звітів
-
-- Адміністратор може згенерувати звіт про паркування та завантажувати його у форматі CSV через відповідний інтерфейс.
-
-
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-### Інструкція з використання
-##  Додавання нового транспортного засобу
-
-- Перейдіть на сторінку додавання транспортного засобу.
-- Заповніть форму, вибравши тип транспортного засобу зі списку (Car, Truck, Motorcycle, Yacht).
-- Збережіть транспортний засіб.
-- Перегляд паркувальних сесій
-
-- Авторизовані користувачі можуть переглядати свої паркувальні сесії.
-- Адміністратор може переглядати всі паркувальні сесії.
-- Експорт звітів у CSV
-
-- Адміністратор може згенерувати звіт про паркування за певний період і експортувати його у форматі CSV.
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-### Поширені проблеми
-- Проблеми з Tesseract OCR: Переконайтеся, що Tesseract OCR встановлений і доданий до вашого PATH.
-- Проблеми з базою даних: Переконайтеся, що налаштування підключення до бази даних правильні, і база даних запущена.
+### Common Issues
+- Database problems: Ensure that the database connection settings are correct and the database is running
