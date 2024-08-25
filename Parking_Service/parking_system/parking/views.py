@@ -1,30 +1,56 @@
-import cv2
-import numpy as np
+import base64
 import csv
+from datetime import timedelta
 from decimal import Decimal
-from django.http import HttpResponse
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Vehicle, ParkingSession, ParkingImage, ParkingRate, ParkingSpot
 # from .vision import detect_license_plate
 from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
 
-from django.contrib.auth.forms import UserCreationForm
+import cv2
+import numpy as np
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from .forms import UserRegisterForm, VehicleForm
 from django.contrib.auth.decorators import login_required
-from django.db.models.functions import Replace, Trim, Upper
 from django.db.models import Value
-
+from django.db.models.functions import Replace, Trim, Upper
+from django.http import HttpResponse
 from django.utils import timezone
 
+# from .vision import detect_license_plate
+from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm, UserProfileForm, \
+    TransactionForm
+from .forms import UserRegisterForm, VehicleForm
+from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction, ParkingImage
 from .vision import detect_and_recognize_license_plates
-import base64
 
 
 def home(request):
     rates = ParkingRate.objects.all()
     return render(request, 'home.html', {'rates': rates})
+
+
+@login_required
+def edit_profile(request):
+    # Создаем профиль, если его нет
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        # Обработка данных формы
+        form = UserProfileForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = UserProfileForm(instance=user_profile)
+
+    return render(request, 'edit_profile.html', {'form': form})
+
+
+@login_required
+def transaction_history(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by('-timestamp')
+    return render(request, 'transaction_history.html', {'transactions': transactions})
 
 
 def upload_image(request):
@@ -274,3 +300,65 @@ def end_parking_session(request):
 def parking_status(request):
     spots = ParkingSpot.objects.all().order_by('number')
     return render(request, 'parking_status.html', {'spots': spots})
+
+
+@login_required
+def add_transaction(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, user=request.user)
+        if form.is_valid():
+            vehicle = form.cleaned_data['vehicle']
+            start_date = form.cleaned_data['start_date']
+            # is_disabled = form.cleaned_data['is_disabled']
+            parking_spot = form.cleaned_data['parking_spot']
+
+            # Check if the vehicle is blocked
+            if vehicle.is_blocked:
+                messages.error(request, "Выбранное авто заблокировано.")
+                return redirect('add-transaction')
+
+            # Get user profile and check balance
+            user_profile = UserProfile.objects.get(user=request.user)
+            parking_rate = ParkingRate.objects.get(vehicle_type=vehicle.vehicle_type)
+            rate = parking_rate.rental_rate
+
+            if user_profile.monetary_limit < rate:
+                messages.error(request, "Пополните баланс.")
+                return redirect('add-transaction')
+
+            if parking_spot:
+                # Save parking spot and subscription end date to vehicle
+                vehicle.parking_spot = parking_spot
+                vehicle.subscription_end_date = start_date + timedelta(days=30)
+                vehicle.save()
+
+                # Mark the parking spot as occupied
+                parking_spot.is_occupied = True
+                parking_spot.occupied_by = vehicle
+                parking_spot.occupied_since = start_date
+                parking_spot.save()
+
+            # Create a new transaction
+            # if not is_blocked:
+            Transaction.objects.create(
+                user=request.user,
+                transaction_type='SUBSCRIPTION_FEE',
+                amount=rate,
+                description=f"Subscription fee for vehicle {vehicle.license_plate}"
+            )
+            # Deduct money from the user's balance
+            user_profile.monetary_limit -= rate
+            user_profile.save()
+
+            # Handle disabled vehicle
+            # if is_disabled:
+            #     vehicle.is_disabled = True
+            #     vehicle.save()
+
+            messages.success(request, "Абонемент успешно оформлен.")
+            return redirect('home')
+
+    else:
+        form = TransactionForm(user=request.user)
+
+    return render(request, 'add_transaction.html', {'form': form})
