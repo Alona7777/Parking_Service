@@ -3,6 +3,10 @@ import csv
 from datetime import timedelta
 from decimal import Decimal
 
+from django.shortcuts import render, redirect, get_object_or_404
+# from .vision import detect_license_plate
+from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
+
 import cv2
 import numpy as np
 from dateutil.relativedelta import relativedelta
@@ -11,14 +15,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Value
 from django.db.models.functions import Replace, Trim, Upper
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
 from django.utils import timezone
 
 # from .vision import detect_license_plate
 from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm, UserProfileForm, \
     TransactionForm
 from .forms import UserRegisterForm, VehicleForm
-from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction
+from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction, ParkingImage
 from .vision import detect_and_recognize_license_plates
 
 
