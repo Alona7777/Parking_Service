@@ -11,11 +11,58 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}" media="screen">  
 </head>
 
+  <!-- підпис десь! -->
+
 <body data-home-page="home.html" data-home-page-title="Parking System" data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="ua">
     <header>
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="{% url 'home' %}">Parking System</a>
+
+              <!-- підпис десь! -->
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">Parking System</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'upload_image' %}">Upload Image</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vehicle_list' %}">Vehicles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'parking_sessions' %}">Parking Sessions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add_vehicle' %}">Add Vehicle</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'find_vehicle' %}">Find Vehicle</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'parking_status' %}">Status parking</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vehicle_entry' %}">Vehicle Entry</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vehicle_exit' %}">Vehicle Exit</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'edit_profile' %}">Edit Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'transaction-history' %}">Transaction History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add-transaction' %}">Add Transaction</a>
+                    </li>
+                </ul>
+
+              <!-- підпис десь! -->
+              
                 <div class="d-flex">
                     {% if user.is_authenticated %}
                     <span class="navbar-text text-white me-3">Welcome, {{ user.username }}</span>
@@ -112,7 +159,7 @@
                     </a>
                     
                 </li>
-                <li>
+<!--                 <li>
                     <a href="{% url 'capture_image' %}">
                         Capture Image
                         <span></span>
@@ -120,7 +167,7 @@
                         <span></span>
                         <span></span>
                     </a>
-                </li>
+                </li> -->
                 <li>
                     <a href="{% url 'about_us' %}">
                         About Us

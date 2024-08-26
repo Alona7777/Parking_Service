@@ -1,7 +1,66 @@
 from django import forms
-from .models import ParkingImage, Vehicle, ParkingSession
+from .models import ParkingImage, Vehicle, ParkingSession, UserProfile, ParkingSpot
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
+
+
+class UserProfileForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+    monetary_limit = forms.DecimalField(max_digits=10, decimal_places=2, required=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'monetary_limit']
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        self.fields['first_name'].initial = self.instance.user.first_name
+        self.fields['last_name'].initial = self.instance.user.last_name
+
+    def save(self, commit=True):
+        user_profile = super(UserProfileForm, self).save(commit=False)
+        user_profile.user.first_name = self.cleaned_data['first_name']
+        user_profile.user.last_name = self.cleaned_data['last_name']
+        if commit:
+            user_profile.user.save()
+            user_profile.save()
+        return user_profile
+
+
+# class TransactionForm(forms.Form):
+#     vehicle = forms.ModelChoiceField(queryset=Vehicle.objects.filter(is_blocked=False), label="Vehicle")
+#     parking_spot = forms.ModelChoiceField(queryset=ParkingSpot.objects.filter(spot_type='SUBSCRIPTION',
+#                                                                               is_occupied=False), required=False, label="Parking Spot")
+#     start_date = forms.DateField(label="Start Date")
+#     is_disabled = forms.BooleanField(required=False, label="Disabled")
+
+class TransactionForm(forms.Form):
+    vehicle = forms.ModelChoiceField(queryset=Vehicle.objects.none(), label="Vehicle")
+    start_date = forms.DateField(label="Start Date", widget=forms.DateInput(attrs={'type': 'date'}))
+    # is_disabled = forms.BooleanField(required=False, label="Disabled")
+    parking_spot = forms.ModelChoiceField(queryset=ParkingSpot.objects.none(), required=False, label="Parking Spot")
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # Фильтрация автомобилей
+        if user:
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(owner=user, is_blocked=False)
+
+        # Фильтрация свободных парковочных мест
+        now = timezone.now()
+        occupied_spots = Vehicle.objects.filter(
+            parking_spot__isnull=False,
+            subscription_end_date__gte=now
+        ).values_list('parking_spot', flat=True)
+
+        self.fields['parking_spot'].queryset = ParkingSpot.objects.filter(
+            spot_type='SUBSCRIPTION',
+            is_occupied=False
+        ).exclude(id__in=occupied_spots)
 
 
 class ParkingImageForm(forms.ModelForm):
