@@ -4,6 +4,31 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    monetary_limit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Лимит средств
+
+    def __str__(self):
+        return self.user.username
+
+
+class Transaction(models.Model):
+    TRANSACTION_TYPE_CHOICES = [
+        ('PARKING_FEE', 'Parking Fee'),
+        ('SUBSCRIPTION_FEE', 'Subscription Fee'),
+        ('OTHER', 'Other'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    timestamp = models.DateTimeField(auto_now_add=True)  # Время транзакции
+    description = models.TextField(blank=True, null=True)  # Описание транзакции
+
+    def __str__(self):
+        return f"{self.user.username} - {self.transaction_type} - {self.amount} at {self.timestamp}"
+
+
 class ParkingSpot(models.Model):
     SPOT_TYPE_CHOICES = [
         ('SUBSCRIPTION', 'Subscription'),
@@ -80,13 +105,10 @@ class ParkingRate(models.Model):
         ('yacht', 'Yacht'),
     ])
 
-    # vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES, unique=False)
-    rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
+    rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
+    rental_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  # Цена аренды стоянки
+    disabled_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  # Цена для инвалидов
 
     def __str__(self):
-        return f"{self.get_vehicle_type_display()} - {self.rate_per_hour} per hour"
-
-
-
-
-
+        return f"{self.get_vehicle_type_display()} - {self.rate_per_hour} per hour, " \
+               f"Rental Rate: {self.rental_rate}, Disabled Rate: {self.disabled_rate}"
