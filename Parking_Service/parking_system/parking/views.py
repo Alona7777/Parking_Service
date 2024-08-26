@@ -24,6 +24,13 @@ from .forms import UserRegisterForm, VehicleForm
 from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction, ParkingImage
 from .vision import detect_and_recognize_license_plates
 
+from django.core.files.base import ContentFile
+from django.views.decorators.cache import cache_page
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 def home(request):
     rates = ParkingRate.objects.all()
@@ -302,6 +309,44 @@ def parking_status(request):
     return render(request, 'parking_status.html', {'spots': spots})
 
 
+
+# @cache_page(60 * 15)
+# def capture_image(request):
+#     if request.method == 'POST':
+#         # Відкриття вебкамери
+#         cap = cv2.VideoCapture(0)
+#         # # "Прогреваем" камеру, чтобы снимок не был тёмным
+#         # for i in range(30):
+#         #     cap.read()
+#         if not cap.isOpened():
+#             return render(request, 'capture_image.html', {'error': 'Could not access the camera.'})
+
+#         # Захоплення кадру
+#         ret, frame = cap.read()
+#         cap.release()
+
+#         if not ret:
+#             return render(request, 'capture_image.html', {'error': 'Could not capture image.'})
+
+#         # Обробка зображення для розпізнавання номерного знака
+#         license_plates, annotated_image = detect_and_recognize_license_plates(frame)
+#         combined_plates = ', '.join(license_plates)
+
+#         # Кодування зображення у формат Base64 для виведення на сторінці
+#         _, buffer = cv2.imencode('.jpg', annotated_image)
+#         image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+#         return render(request, 'capture_image.html', {
+#             'license_plate': combined_plates,
+#             'annotated_image_base64': image_base64
+#         })
+
+#     return render(request, 'capture_image.html')
+
+# def about_us(request):
+#     return render(request, 'about_us.html')
+
+
 @login_required
 def add_transaction(request):
     if request.method == 'POST':
@@ -362,3 +407,4 @@ def add_transaction(request):
         form = TransactionForm(user=request.user)
 
     return render(request, 'add_transaction.html', {'form': form})
+  
