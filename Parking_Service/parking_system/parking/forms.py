@@ -112,13 +112,32 @@ class VehicleSearchForm(forms.Form):
         return cleaned_license_plate
 
 
+# class StartParkingSessionForm(forms.Form):
+#     vehicle = forms.ModelChoiceField(
+#         queryset=Vehicle.objects.filter(
+#             id__in=Vehicle.objects.exclude(
+#                 id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+#             )
+#         ).distinct(),
+#         label="Vehicle"
+#     )
+#     entry_time = forms.DateTimeField(
+#         label="Entry Time",
+#         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+#     )
+#
+#     def __init__(self, *args, **kwargs):
+#         # Переопределяем метод __init__ чтобы фильтровать автомобили
+#         super().__init__(*args, **kwargs)
+#         self.fields['vehicle'].queryset = Vehicle.objects.filter(
+#             id__in=Vehicle.objects.exclude(
+#                 id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+#             )
+#         ).distinct()
+
 class StartParkingSessionForm(forms.Form):
     vehicle = forms.ModelChoiceField(
-        queryset=Vehicle.objects.filter(
-            id__in=Vehicle.objects.exclude(
-                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
-            )
-        ).distinct(),
+        queryset=Vehicle.objects.none(),  # Initially empty, will be populated in __init__
         label="Vehicle"
     )
     entry_time = forms.DateTimeField(
@@ -127,20 +146,42 @@ class StartParkingSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        # Переопределяем метод __init__ чтобы фильтровать автомобили
+        user = kwargs.pop('user')  # Get the user from the kwargs
         super().__init__(*args, **kwargs)
-        self.fields['vehicle'].queryset = Vehicle.objects.filter(
-            id__in=Vehicle.objects.exclude(
-                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
-            )
-        ).distinct()
 
+        if user.is_superuser:
+            # If the user is a superuser, show all vehicles
+            self.fields['vehicle'].queryset = Vehicle.objects.all()
+        else:
+            # If the user is not a superuser, show only their unblocked vehicles
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(
+                owner=user,
+                is_blocked=False
+            )
+
+
+# class EndParkingSessionForm(forms.Form):
+#     vehicle = forms.ModelChoiceField(
+#         queryset=Vehicle.objects.filter(
+#             id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+#         ).distinct(),
+#         label="Vehicle"
+#     )
+#     exit_time = forms.DateTimeField(
+#         label="Exit Time",
+#         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+#     )
+#
+#     def __init__(self, *args, **kwargs):
+#         # Переопределяем метод __init__ чтобы фильтровать автомобили
+#         super().__init__(*args, **kwargs)
+#         self.fields['vehicle'].queryset = Vehicle.objects.filter(
+#             id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+#         ).distinct()
 
 class EndParkingSessionForm(forms.Form):
     vehicle = forms.ModelChoiceField(
-        queryset=Vehicle.objects.filter(
-            id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
-        ).distinct(),
+        queryset=Vehicle.objects.none(),  # Изначально пустой queryset
         label="Vehicle"
     )
     exit_time = forms.DateTimeField(
@@ -149,8 +190,18 @@ class EndParkingSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        # Переопределяем метод __init__ чтобы фильтровать автомобили
+        user = kwargs.pop('user')  # Получаем пользователя из kwargs
         super().__init__(*args, **kwargs)
-        self.fields['vehicle'].queryset = Vehicle.objects.filter(
-            id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
-        ).distinct()
+
+        # Фильтрация queryset для поля vehicle в зависимости от типа пользователя
+        if user.is_superuser:
+            # Суперпользователь видит все транспортные средства
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(
+                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+            ).distinct()
+        else:
+            # Обычный пользователь видит только свои автомобили
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(
+                owner=user,
+                id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
+            ).distinct()
