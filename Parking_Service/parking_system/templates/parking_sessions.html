@@ -1,26 +1,56 @@
-<!-- {% extends "base.html" %} -->
+{% extends "base.html" %}
 
 {% block content %}
-<h2>Your Parking Sessions</h2>
-<a href="{% url 'export_parking_report_csv' %}" class="btn btn-primary">Download Report (CSV)</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>License Plate</th>
-            <th>Entry Time</th>
-            <th>Exit Time</th>
-            <th>Total Duration</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for session in sessions %}
-        <tr>
-            <td>{{ session.vehicle.license_plate }}</td>
-            <td>{{ session.entry_time }}</td>
-            <td>{{ session.exit_time|default:"In Progress" }}</td>
-            <td>{{ session.total_duration }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: -300px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        border: 1px solid rgba(221, 221, 221, 0.5);
+        padding: 8px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    .table th {
+        background-color: rgba(200, 200, 200, 0.4);
+    }
+
+</style>
+
+<div class="table-container">
+    <h2>Your Parking Sessions</h2>
+    <a href="{% url 'export_parking_report_csv' %}" class="btn btn-primary">Download Report (CSV)</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>License Plate</th>
+                <th>Entry Time</th>
+                <th>Exit Time</th>
+                <th>Total Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td>{{ session.vehicle.license_plate }}</td>
+                <td>{{ session.entry_time }}</td>
+                <td>{{ session.exit_time|default:"In Progress" }}</td>
+                <td>{{ session.total_duration }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

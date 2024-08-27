@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
 from .views import add_vehicle, export_parking_report_csv, transaction_history, add_transaction
-from . views import add_vehicle, export_parking_report_csv
 
 
 urlpatterns = [
@@ -18,7 +17,7 @@ urlpatterns = [
     path('end_parking/<int:vehicle_id>/', views.end_parking_session, name='end_parking_session'),
     path('parking_status/', views.parking_status, name='parking_status'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
-    path('transaction-history/', transaction_history, name='transaction-history'),
+    path('transaction_history/', transaction_history, name='transaction_history'),
     path('add-transaction/', add_transaction, name='add-transaction'),
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
     path('capture_image/', views.capture_image, name='capture_image'),

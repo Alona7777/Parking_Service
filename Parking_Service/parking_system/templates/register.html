@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Register</title>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/Entry_styles.css' %}" media="screen">
-<body>
+
+    <body>
     <section>
         <div class="main">
             <span class="border"></span>
@@ -17,11 +18,13 @@
                 <form method="post">
                     <h2>Register</h2>
                     {% csrf_token %}
-                    
+
                     <div>
                         <input type="text" name="username" required>
                         <span> Username </span>
                         <i></i>
+                    </div>
+                    <div>
                         {% if form.username.errors %}
                             <div class="error">{{ form.username.errors }}</div>
                         {% endif %}
@@ -31,6 +34,9 @@
                         <input type="email" name="email" required>
                         <span> Email </span>
                         <i></i>
+                    </div>
+
+                    <div>
                         {% if form.email.errors %}
                             <div class="error">{{ form.email.errors }}</div>
                         {% endif %}
@@ -40,8 +46,10 @@
                         <input type="password" name="password1" required>
                         <span> Password </span>
                         <i></i>
+                    </div>
+                    <div>
                         {% if form.password1.errors %}
-                            <div class="error">{{ form.password1.errors }}</div>
+                                <div class="error">{{ form.password1.errors }}</div>
                         {% endif %}
                     </div>
 
@@ -49,6 +57,8 @@
                         <input type="password" name="password2" required>
                         <span> Confirm Password </span>
                         <i></i>
+                    </div>
+                    <div>
                         {% if form.password2.errors %}
                             <div class="error">{{ form.password2.errors }}</div>
                         {% endif %}
