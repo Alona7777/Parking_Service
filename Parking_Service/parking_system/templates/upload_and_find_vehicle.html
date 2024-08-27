@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Загрузить изображение и найти автомобиль по номеру</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="image" class="form-label">Выберите изображение</label>
+            <input class="form-control" type="file" name="image" id="image" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+    </form>
+
+    {% if license_plate %}
+        <div class="alert alert-success mt-3" role="alert">
+            Распознанный номерной знак: {{ license_plate }}
+        </div>
+    {% endif %}
+
+    {% if result %}
+        <h2>Детали автомобиля</h2>
+        <ul>
+            <li>Номерной знак: {{ result.license_plate }}</li>
+            <li>Тип автомобиля: {{ result.vehicle_type }}</li>
+            <li>ID владельца: {{ result.owner_id }}</li>
+            <li>Имя пользователя: {{ result.username }}</li>
+            <li>Имя: {{ result.first_name }}</li>
+            <li>Фамилия: {{ result.last_name }}</li>
+        </ul>
+    {% elif license_plate %}
+        <h2>Детали автомобиля</h2>
+        <p>Автомобиль с таким номером не найден.</p>
+    {% endif %}
+
+    {% if annotated_image_base64 %}
+        <h3>Аннотированное изображение:</h3>
+        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Аннотированное изображение" class="img-fluid mt-3">
+    {% endif %}
+{% endblock %}

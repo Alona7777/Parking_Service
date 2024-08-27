@@ -6,6 +6,8 @@ from decimal import Decimal
 import cv2
 import numpy as np
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
+from fuzzywuzzy import process
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Value
@@ -413,3 +415,67 @@ def add_transaction(request):
         form = TransactionForm(user=request.user)
 
     return render(request, 'add_transaction.html', {'form': form})
+
+
+@login_required
+def upload_and_find_vehicle(request):
+    if request.method == 'POST':
+        form = ParkingImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            image_file = form.cleaned_data['image']
+            nparr = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Распознавание номерного знака
+            license_plates, annotated_image = detect_and_recognize_license_plates(img)
+            combined_plates = ', '.join(license_plates)
+
+            result = None
+            if license_plates:
+                cleaned_query_plate = license_plates[0].upper().replace(" ", "").replace("-", "")
+
+                # Очистка и форматирование номеров в базе данных
+                cleaned_vehicles = Vehicle.objects.annotate(
+                    cleaned_license_plate=Trim(
+                        Replace(Replace(Upper('license_plate'), Value(" "), Value("")), Value("-"), Value("")))
+                ).select_related('owner')
+
+                # Извлекаем все номера из базы данных и чистим их
+                all_plates = Vehicle.objects.values_list('license_plate', flat=True)
+                cleaned_plates = [plate.upper().replace(" ", "").replace("-", "") for plate in all_plates]
+
+                # Используем fuzzywuzzy для поиска наиболее похожего номера
+                best_match = process.extractOne(cleaned_query_plate, cleaned_plates)
+
+                if best_match and best_match[1] > 40:  # Если совпадение больше 40%
+                    matching_vehicles = cleaned_vehicles.filter(cleaned_license_plate=best_match[0])
+
+                    if matching_vehicles.exists():
+                        vehicle = matching_vehicles.first()  # Берем первый найденный
+                        result = {
+                            'license_plate': vehicle.license_plate,
+                            'vehicle_type': vehicle.vehicle_type,
+                            'owner_id': vehicle.owner.id,
+                            'username': vehicle.owner.username,
+                            'first_name': vehicle.owner.first_name,
+                            'last_name': vehicle.owner.last_name,
+                        }
+                    else:
+                        result = None
+                else:
+                    result = None
+
+            # Кодирование изображения в Base64
+            _, buffer = cv2.imencode('.jpg', annotated_image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+            return render(request, 'upload_and_find_vehicle.html', {
+                'license_plate': combined_plates,
+                'result': result,
+                'annotated_image_base64': image_base64
+            })
+    else:
+        form = ParkingImageForm()
+
+    return render(request, 'upload_and_find_vehicle.html', {'form': form})
+
