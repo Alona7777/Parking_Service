@@ -11,58 +11,11 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}" media="screen">  
 </head>
 
-  <!-- підпис десь! -->
-
 <body data-home-page="home.html" data-home-page-title="Parking System" data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="ua">
     <header>
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="{% url 'home' %}">Parking System</a>
-
-              <!-- підпис десь! -->
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">Parking System</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'upload_image' %}">Upload Image</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicle_list' %}">Vehicles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'parking_sessions' %}">Parking Sessions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'add_vehicle' %}">Add Vehicle</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'find_vehicle' %}">Find Vehicle</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'parking_status' %}">Status parking</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicle_entry' %}">Vehicle Entry</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicle_exit' %}">Vehicle Exit</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'edit_profile' %}">Edit Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'transaction-history' %}">Transaction History</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'add-transaction' %}">Add Transaction</a>
-                    </li>
-                </ul>
-
-              <!-- підпис десь! -->
-              
                 <div class="d-flex">
                     {% if user.is_authenticated %}
                     <span class="navbar-text text-white me-3">Welcome, {{ user.username }}</span>
@@ -78,18 +31,20 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        {% block content %}
-        {% endblock %}
-    </div>
+
     <section class="u-clearfix u-image u-shading u-section-1" id="sec-0876" data-image-width="1024" data-image-height="1024">
         <div class="u-clearfix u-sheet u-sheet-1">
             <h1 class="u-text u-text-1" data-animation-name="customAnimationIn" data-animation-duration="2000"> Parking
                 Services</h1>
             <p class="u-text u-text-2"> A system that determines the car number using computer vision.</p>
         </div>
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
         <section>
             <ul>
+                {% if user.is_superuser %}
                 <li>
                     <a href="{% url 'upload_image' %}">
                         Upload Image
@@ -101,27 +56,8 @@
                     
                 </li>
                 <li>
-                    <a href="{% url 'vehicle_list' %}">Vehicles
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'parking_sessions' %}">
-                        Parking Sessions
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </a>
-                    
-                </li>
-                <li>
-                    <a href="{% url 'add_vehicle' %}">
-                        Add Vehicle
+                    <a href="{% url 'vehicle_list' %}">
+                        Vehicles
                         <span></span>
                         <span></span>
                         <span></span>
@@ -159,7 +95,7 @@
                     </a>
                     
                 </li>
-<!--                 <li>
+                <li>
                     <a href="{% url 'capture_image' %}">
                         Capture Image
                         <span></span>
@@ -167,7 +103,58 @@
                         <span></span>
                         <span></span>
                     </a>
-                </li> -->
+                </li>
+                <li>
+                    <a href="{% url 'parking_sessions' %}">
+                        Parking Sessions
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                    
+                </li>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'add_vehicle' %}">
+                        Add Vehicle
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'edit_profile' %}">
+                        Edit profile
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'transaction_history' %}">
+                        Transaction history
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'add_transaction' %}">
+                        Add Transaction
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if not user.is_authenticated %}
                 <li>
                     <a href="{% url 'about_us' %}">
                         About Us
@@ -177,10 +164,12 @@
                         <span></span>
                     </a>
                 </li>
+                {% endif %}
             </ul>
         </section>    
     </section>
 </body>
+
 <footer>
     <p class="copyright">
         Made with <span class="Command">❤</span> by <a class="Command" href="{% url 'about_us' %}">FiveContinents Coders</a>
