@@ -17,48 +17,53 @@
                 <form method="post">
                     <h2>Register</h2>
                     {% csrf_token %}
-                    
+
                     <div>
                         <input type="text" name="username" required>
                         <span> Username </span>
                         <i></i>
-                        {% if form.username.errors %}
-                            <div class="error">{{ form.username.errors }}</div>
-                        {% endif %}
                     </div>
 
                     <div>
                         <input type="email" name="email" required>
                         <span> Email </span>
                         <i></i>
-                        {% if form.email.errors %}
-                            <div class="error">{{ form.email.errors }}</div>
-                        {% endif %}
                     </div>
 
                     <div>
                         <input type="password" name="password1" required>
                         <span> Password </span>
                         <i></i>
-                        {% if form.password1.errors %}
-                            <div class="error">{{ form.password1.errors }}</div>
-                        {% endif %}
                     </div>
 
                     <div>
                         <input type="password" name="password2" required>
                         <span> Confirm Password </span>
                         <i></i>
+                    </div>
+
+                    <input type="submit" value="Register">
+
+                    <div class="error-messages">
+                        {% if form.username.errors %}
+                            <div class="error">{{ form.username.errors }}</div>
+                        {% endif %}
+                        {% if form.email.errors %}
+                            <div class="error">{{ form.email.errors }}</div>
+                        {% endif %}
+                        {% if form.password1.errors %}
+                            <div class="error">{{ form.password1.errors }}</div>
+                        {% endif %}
                         {% if form.password2.errors %}
                             <div class="error">{{ form.password2.errors }}</div>
                         {% endif %}
                     </div>
 
-                    <input type="submit" value="Register">
                 </form>
                 <a href="/" class="btn btn-secondary w-100">Return to Home</a>
             </div>
         </div>
     </section>
+
 </body>
 </html>
