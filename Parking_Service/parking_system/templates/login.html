@@ -22,6 +22,8 @@
                         <input type="text" name="username" required>
                         <span> Username </span>
                         <i></i>
+                    </div>
+                    <div>
                         {% if form.username.errors %}
                             <div class="error">{{ form.username.errors }}</div>
                         {% endif %}
@@ -31,11 +33,19 @@
                         <input type="password" name="password" required="required">
                         <span> Password </span>
                         <i></i>
+                    </div>
+
+                    <div>
                         {% if form.password.errors %}
                             <div class="error">{{ form.password.errors }}</div>
                         {% endif %}
                     </div>
-
+                    <div>
+                        {% if form.non_field_errors %}
+                            <div class="error">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                    </div>
+                        
                     <input type="submit" value="Submit">
 
                 </form>
