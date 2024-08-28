@@ -20,6 +20,7 @@ urlpatterns = [
     path('add-transaction/', add_transaction, name='add-transaction'),
     path('upload-and-find/', upload_and_find_vehicle, name='upload-and-find-vehicle'),
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
+    path('about_us/', views.about_us, name='about_us'),
 
 ]
 
