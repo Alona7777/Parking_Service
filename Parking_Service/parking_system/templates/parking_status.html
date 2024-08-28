@@ -56,15 +56,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Spot Number</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Occupied By</th>
-                <th>Occupied Since</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for spot in spots %}
+	@@ -17,11 +68,15 @@ <h1>Parking Spots Status</h1>
             <tr>
                 <td>{{ spot.number }}</td>
                 <td>{{ spot.get_spot_type_display }}</td>
