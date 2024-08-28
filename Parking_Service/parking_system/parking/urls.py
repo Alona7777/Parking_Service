@@ -20,7 +20,6 @@ urlpatterns = [
     path('transaction_history/', transaction_history, name='transaction_history'),
     path('add-transaction/', add_transaction, name='add-transaction'),
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
-    path('capture_image/', views.capture_image, name='capture_image'),
     path('about_us/', views.about_us, name='about_us'),
 ]
 
