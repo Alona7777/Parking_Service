@@ -1,24 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Add Vehicle</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            <ul>
-                {% for field in form %}
-                    {% for error in field.errors %}
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: 50px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+  
+  </style>
+  
+<div class="table-container">
+    <h2>Add Vehicle</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
                         <li>{{ error }}</li>
                     {% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    <button type="submit" class="btn btn-primary">Add Vehicle</button>
-</form>
+                </ul>
+            </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary w-100">Add Vehicle</button>
+    </form>
+</div> 
 {% endblock %}

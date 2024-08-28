@@ -1,78 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Image for License Plate Recognition</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-        }
-        .card {
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .card-title {
-            font-size: 1.5rem;
-            color: #343a40;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .img-fluid {
-            border-radius: 10px;
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Upload Image for License Plate Recognition</h2>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Choose Image</label>
-                            <input class="form-control" type="file" name="image" id="image" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Upload</button>
-                        <a href="/" class="btn btn-secondary w-100">Return to Home</a>
-                    </form>
-
-                    {% if license_plate %}
-                        <div class="alert alert-success mt-4" role="alert">
-                            Recognized License Plate: <strong>{{ license_plate }}</strong>
-                        </div>
-                    {% endif %}
-
-                    {% if annotated_image_base64 %}
-                        <h3 class="text-center mt-4">Annotated Image:</h3>
-                        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Annotated Image" class="img-fluid mt-3 rounded mx-auto d-block">
-                    {% endif %}
-                </div>
-            </div>
+{% block content %}
+    <h2>Upload an image and find a car by number</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="image" class="form-label">Choose Image</label>
+            <input class="form-control" type="file" name="image" id="image" required>
         </div>
-    </div>
-</div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    {% if license_plate %}
+        <div class="alert alert-success mt-3" role="alert">
+            Recognized license plate: {{ license_plate }}
+        </div>
+    {% endif %}
+
+    {% if annotated_image_base64 %}
+        <h3>Annotated image:</h3>
+        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Annotated image" class="img-fluid mt-3">
+    {% endif %}
+{% endblock %}
