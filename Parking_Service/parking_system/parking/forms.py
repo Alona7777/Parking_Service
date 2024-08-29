@@ -205,3 +205,19 @@ class EndParkingSessionForm(forms.Form):
                 owner=user,
                 id__in=ParkingSession.objects.filter(exit_time__isnull=True).values('vehicle_id')
             ).distinct()
+
+
+class StartParkingSessionImageForm(forms.Form):
+    image = forms.ImageField(label="Upload Image")
+    entry_time = forms.DateTimeField(
+        label="Entry Time",
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
+
+class EndParkingSessionImageForm(forms.Form):
+    exit_time = forms.DateTimeField(
+        label="Exit Time",
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
