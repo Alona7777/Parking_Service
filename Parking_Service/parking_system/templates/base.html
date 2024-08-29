@@ -98,8 +98,28 @@
                     
                 </li>
                 <li>
+                    <a href="{% url 'start_parking_session_image' %}">
+                        Vehicle Entry by image
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                    
+                </li>
+                <li>
                     <a href="{% url 'vehicle_exit' %}">
                         Vehicle Exit
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
+                    
+                </li>
+                <li>
+                    <a href="{% url 'end_parking_session_image' %}">
+                        Vehicle Exit by image
                         <span></span>
                         <span></span>
                         <span></span>
@@ -175,6 +195,25 @@
                     </a>
                     
                 </li>
+            <li>
+                <a href="{% url 'start_parking_session_image' %}">
+                    Vehicle Entry by image
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                
+            </li>
+            <li>
+                <a href="{% url 'end_parking_session_image' %}">
+                    Vehicle Exit by image
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                
                 {% endif %}
                 {% if not user.is_authenticated %}
                 <li>

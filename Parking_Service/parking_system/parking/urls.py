@@ -22,6 +22,9 @@ urlpatterns = [
     path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
     path('about_us/', views.about_us, name='about_us'),
     path('capture_image/', views.capture_image, name='capture_image'),
+    path('start_parking_session_image/', views.start_parking_session_image, name='start_parking_session_image'),
+    path('end_parking_session_image/', views.end_parking_session_image, name='end_parking_session_image'),
+
 
 ]
 
