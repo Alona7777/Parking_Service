@@ -5,7 +5,6 @@ services:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    # container_name: my_postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -14,7 +13,6 @@ services:
       - .env
     networks:
       - parking-network
-
 
   web:
     build: .
@@ -31,7 +29,7 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_HOST: db
-      DB_PORT: "5432:5432"
+      DB_PORT: "5432"  # Лише порт без символу ":"
     networks:
       - parking-network
 
