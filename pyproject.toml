@@ -24,6 +24,8 @@ ultralytics = "8.2.78"
 paddlepaddle = "2.6.1"
 paddleocr = "2.8.1"
 opencv-python-headless = "4.10.0.84"
+fuzzywuzzy = "^0.18.0"
+python-levenshtein = "^0.25.1"
 
 
 [build-system]

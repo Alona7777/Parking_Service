@@ -242,7 +242,7 @@ def start_parking_session(request):
             user_profile = UserProfile.objects.get(user_id=vehicle.owner_id)
 
             if user_profile.monetary_limit <= 0:
-                messages.error(request, "Пополните баланс.")
+                messages.error(request, "Top up your balance.")
                 return redirect('vehicle_entry')
 
             # Логика для поиска парковочного места
@@ -362,12 +362,12 @@ def add_transaction(request):
                 parking_spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
                 if not parking_spot:
                     messages.error(request, "Свободных мест нет.")
-                    return redirect('add-transaction')
+                    return redirect('add_transaction')
 
             # Check if the vehicle is blocked
             if vehicle.is_blocked:
                 messages.error(request, "Выбранное авто заблокировано.")
-                return redirect('add-transaction')
+                return redirect('add_transaction')
 
             # Get user profile and check balance
             user_profile = UserProfile.objects.get(user=request.user)
@@ -376,7 +376,7 @@ def add_transaction(request):
 
             if user_profile.monetary_limit < rate:
                 messages.error(request, "Пополните баланс.")
-                return redirect('add-transaction')
+                return redirect('add_transaction')
 
             if parking_spot:
                 # Save parking spot and subscription end date to vehicle
@@ -408,8 +408,8 @@ def add_transaction(request):
             #     vehicle.is_disabled = True
             #     vehicle.save()
 
-            messages.success(request, "Абонемент успешно оформлен.")
-            return redirect('transaction-history')
+            messages.success(request, "Subscription completed successfully.")
+            return redirect('transaction_history')
 
     else:
         form = TransactionForm(user=request.user)
@@ -478,4 +478,41 @@ def upload_and_find_vehicle(request):
         form = ParkingImageForm()
 
     return render(request, 'upload_and_find_vehicle.html', {'form': form})
+
+
+# @cache_page(60 * 15)
+def capture_image(request):
+    if request.method == 'POST':
+        # Відкриття вебкамери
+        cap = cv2.VideoCapture(0)
+        # # "Прогреваем" камеру, чтобы снимок не был тёмным
+        # for i in range(30):
+        #     cap.read()
+        if not cap.isOpened():
+            return render(request, 'capture_image.html', {'error': 'Could not access the camera.'})
+
+        # Захоплення кадру
+        ret, frame = cap.read()
+        cap.release()
+
+        if not ret:
+            return render(request, 'capture_image.html', {'error': 'Could not capture image.'})
+
+        # Обробка зображення для розпізнавання номерного знака
+        license_plates, annotated_image = detect_and_recognize_license_plates(frame)
+        combined_plates = ', '.join(license_plates)
+
+        # Кодування зображення у формат Base64 для виведення на сторінці
+        _, buffer = cv2.imencode('.jpg', annotated_image)
+        image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+        return render(request, 'capture_image.html', {
+            'license_plate': combined_plates,
+            'annotated_image_base64': image_base64
+        })
+
+    return render(request, 'capture_image.html')
+
+def about_us(request):
+    return render(request, 'about_us.html')
 
