@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: -150px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 700px;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        border: 1px solid rgba(221, 221, 221, 0.5);
+        padding: 8px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    .table th {
+        background-color: rgba(200, 200, 200, 0.4);
+    }
+
+</style>
+<div class="table-container">
+    <h2>Upload an image<br>
+        and find a car by license plate number</h2>
+    <table class="table">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="image" class="form-label">Select an image</label>
+                <input class="form-control" type="file" name="image" id="image" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Download</button>
+        </form>
+    </table>
+    {% if license_plate %}
+        <div class="alert alert-success mt-3" role="alert">
+            Recognized license plate number: {{ license_plate }}
+        </div>
+    {% endif %}
+
+    {% if result %}
+        <h2>Vehicle details</h2>
+        <ul>
+            <li>License plate: {{ result.license_plate }}</li>
+            <li>Vehicle type: {{ result.vehicle_type }}</li>
+            <li>Owner ID: {{ result.owner_id }}</li>
+            <li>Username: {{ result.username }}</li>
+            <li>First name: {{ result.first_name }}</li>
+            <li>Last name: {{ result.last_name }}</li>
+        </ul>
+    {% elif license_plate %}
+        <h2>Vehicle details</h2>
+        <p>No vehicle with that license plate was found.</p>
+    {% endif %}
+
+    {% if annotated_image_base64 %}
+        <h3>Annotated image:</h3>
+        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Аннотированное изображение" class="img-fluid mt-3">
+    {% endif %}
+</div>
+{% endblock %}

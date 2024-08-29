@@ -1,24 +1,69 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Find Vehicle by License Plate</h1>
-<form method="GET" action="{% url 'find_vehicle' %}">
-    {{ form.as_p }}
-    <button type="submit">Search</button>
-</form>
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: -300px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table ul {
+        list-style-type: none; /* Відключає маркери списку */
+        padding: 0;
+        margin: 0;
+    }
 
-{% if result %}
-    <h2>Vehicle Details</h2>
-    <ul>
-        <li>License Plate: {{ result.license_plate }}</li>
-        <li>Vehicle Type: {{ result.vehicle_type }}</li>
-        <li>Owner ID: {{ result.owner_id }}</li>
-        <li>Username: {{ result.username }}</li>
-        <li>First Name: {{ result.first_name }}</li>
-        <li>Last Name: {{ result.last_name }}</li>
-    </ul>
-{% elif result is None %}
-    <h2>Vehicle Details</h2>
-    <p>No vehicle found with that license plate.</p>
-{% endif %}
+    .table ul li {
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    /* Чергування кольорів для кожного другого рядка */
+    .table ul li:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.3); /* Прозорий білий */
+    }
+
+    .table ul li:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.3); /* Прозорий чорний */
+    }
+
+</style>
+
+<div class="table-container">
+    <h1>Find Vehicle by License Plate</h1>
+    <table class="table">
+        <form method="GET" action="{% url 'find_vehicle' %}">
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </form>
+
+        {% if result %}
+            <h2>Vehicle Details</h2>
+            <div class="table">
+                <ul>
+                    <li>License Plate: {{ result.license_plate }}</li>
+                    <li>Vehicle Type: {{ result.vehicle_type }}</li>
+                    <li>Owner ID: {{ result.owner_id }}</li>
+                    <li>Username: {{ result.username }}</li>
+                    <li>First Name: {{ result.first_name }}</li>
+                    <li>Last Name: {{ result.last_name }}</li>
+                </ul>
+            </div>
+        {% elif result is None %}
+            <h2>Vehicle Details</h2>
+            <p>No vehicle found with that license plate.</p>
+        {% endif %}
+    </table>
+</div>
 {% endblock %}
+

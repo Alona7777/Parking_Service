@@ -1,0 +1,215 @@
+ *
+{
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    list-style: none;
+    box-sizing: border-box;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+section
+{
+    background: linear-gradient( 25deg , #050505 , #282828 , #050505);
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.main
+{
+    background: #1c1c1c;
+    width: 440px;
+    height: 740px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.border::before ,
+.border::after
+{
+    content: '';
+    display: block;
+    width: 440px;
+    height: 540px;
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    z-index: 1;
+    transform-origin: bottom right;
+    animation: anime 6s linear infinite;
+}
+
+.border:nth-of-type( 1 ):before ,
+.border:nth-of-type( 1 ):after
+{
+    background: linear-gradient( 0deg , transparent , transparent , #03a5f0 , #03a5f0 , #03a5f0 );
+}
+
+.border:nth-of-type( 2 ):before ,
+.border:nth-of-type( 2 ):after
+{
+    background: linear-gradient( 0deg , transparent , transparent , #fff127  , #fff127  , #fff127 );
+}
+        
+.border:nth-of-type( 1 ):after
+{
+    animation-delay: -3s;
+}
+
+.border:nth-of-type( 2 ):before
+{
+    animation-delay: -1.5s;
+}
+
+.border:nth-of-type( 2 ):after
+{
+    animation-delay: -4.5s;
+}
+@keyframes anime
+{
+    0%
+    {
+        transform: rotate( 0deg );
+    }
+    100%
+    {
+        transform: rotate( 360deg );
+    }
+    }
+ 
+.form
+{
+    background: #222;
+    width: 420px;
+    height: 720px;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.form form
+{
+    width: 100%;
+    max-width: 360px;
+    padding-top: 70px 0 0 0;
+}
+
+.form form h2
+{
+    color: #fff;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 5px;
+    padding: 0 0 20px 5px;
+}
+
+.form form div
+    {
+    width: 100%;
+    margin: 20px 0 0 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.form form div input
+{
+    background: transparent;
+    width: 80%;
+    padding: 25px 10px 15px 10px;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 5;
+}
+
+.form form div input:valid ,
+.form form div input:focus
+{
+    width: 100%;
+}
+
+.form form div span
+{
+    width: 100%;
+    padding: 10px 0;
+    color: #ccc;
+    font-size: 22px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 1px;
+    position: absolute;
+    left: 0;
+    z-index: 4;
+    transition: 0.5s
+}
+
+.form form div input:valid ~ span,
+.form form div input:focus ~ span
+{
+    color: #1fb6dc;
+    font-size: 14px;
+    font-weight: 400;
+    transform: translateY( - 30% );
+}
+
+.form form div i
+{
+    background: #323232;
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 3;
+    transition: 0.5s;
+}
+
+.form form div input:valid ~ i,
+.form form div input:focus ~ i
+{
+    width: 100%;
+}
+
+.form form input[type="submit"]
+{
+    display: block;
+    background: #fff127;
+    padding: 15px 25px;
+    margin: 30px auto 0 auto;
+    color: #222;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.form form input[type="submit"]:hover
+{
+    background: transparent;
+    color: #fff127;
+    padding: 15px 60px;
+    box-shadow: 0 0 5px #fff127 , 0 0 10px #fff127;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    width: 100%; 
+    text-align: center; 
+}

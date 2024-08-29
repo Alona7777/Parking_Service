@@ -1,14 +1,57 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/Entry_styles.css' %}" media="screen">
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Login</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
+<body>
+    <section>
+        <div class="main">
+            <span class="border"></span>
+            <span class="border"></span>
+
+            <div class="form">
+                <form method="post">
+                    <h2>Login</h2>
+                    {% csrf_token %}
+                    <div>
+                        <input type="text" name="username" required>
+                        <span> Username </span>
+                        <i></i>
+                    </div>
+                    <div>
+                        {% if form.username.errors %}
+                            <div class="error">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <input type="password" name="password" required="required">
+                        <span> Password </span>
+                        <i></i>
+                    </div>
+
+                    <div>
+                        {% if form.password.errors %}
+                            <div class="error">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.non_field_errors %}
+                            <div class="error">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                    </div>
+                        
+                    <input type="submit" value="Submit">
+
+                </form>
+                <a href="/" class="btn btn-secondary w-100">Return to Home</a> 
+            </div>
+        </div>
+    </section>
+</body>
+</html>

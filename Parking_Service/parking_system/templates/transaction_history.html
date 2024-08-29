@@ -1,11 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: -300px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        border: 1px solid rgba(221, 221, 221, 0.5);
+        padding: 8px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    .table th {
+        background-color: rgba(200, 200, 200, 0.4);
+    }
+
+</style>
+
+<div class="table-container">
     <h1 class="mt-4 mb-4">Transaction history</h1>
 
     {% if transactions %}
-        <table class="table table-striped">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Transaction type</th>
@@ -30,3 +58,4 @@
     {% endif %}
 </div>
 {% endblock %}
+

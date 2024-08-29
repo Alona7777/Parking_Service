@@ -3,25 +3,24 @@ import csv
 from datetime import timedelta
 from decimal import Decimal
 
-from django.shortcuts import render, redirect, get_object_or_404
-# from .vision import detect_license_plate
-from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm
-
 import cv2
 import numpy as np
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
+from fuzzywuzzy import process
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Value
 from django.db.models.functions import Replace, Trim, Upper
 from django.http import HttpResponse
+from django.shortcuts import render, redirect
 from django.utils import timezone
 
 # from .vision import detect_license_plate
 from .forms import ParkingImageForm, VehicleSearchForm, StartParkingSessionForm, EndParkingSessionForm, UserProfileForm, \
     TransactionForm
 from .forms import UserRegisterForm, VehicleForm
-from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction, ParkingImage
+from .models import Vehicle, ParkingSession, ParkingRate, ParkingSpot, UserProfile, Transaction
 from .vision import detect_and_recognize_license_plates
 
 
@@ -47,9 +46,20 @@ def edit_profile(request):
     return render(request, 'edit_profile.html', {'form': form})
 
 
+# @login_required
+# def transaction_history(request):
+#     transactions = Transaction.objects.filter(user=request.user).order_by('-timestamp')
+#     return render(request, 'transaction_history.html', {'transactions': transactions})
+
 @login_required
 def transaction_history(request):
-    transactions = Transaction.objects.filter(user=request.user).order_by('-timestamp')
+    if request.user.is_superuser:
+        # Суперпользователь видит все транзакции
+        transactions = Transaction.objects.all().order_by('-timestamp')
+    else:
+        # Обычный пользователь видит только свои транзакции
+        transactions = Transaction.objects.filter(user=request.user).order_by('-timestamp')
+
     return render(request, 'transaction_history.html', {'transactions': transactions})
 
 
@@ -225,10 +235,15 @@ def find_vehicle(request):
 
 def start_parking_session(request):
     if request.method == "POST":
-        form = StartParkingSessionForm(request.POST)
+        form = StartParkingSessionForm(request.POST, user=request.user)
         if form.is_valid():
             vehicle = form.cleaned_data['vehicle']
             entry_time = form.cleaned_data['entry_time']
+            user_profile = UserProfile.objects.get(user_id=vehicle.owner_id)
+
+            if user_profile.monetary_limit <= 0:
+                messages.error(request, "Top up your balance.")
+                return redirect('vehicle_entry')
 
             # Логика для поиска парковочного места
             if vehicle.subscription_end_date and vehicle.subscription_end_date >= timezone.now().date():
@@ -259,19 +274,21 @@ def start_parking_session(request):
             else:
                 return render(request, 'no_parking_spots.html')
     else:
-        form = StartParkingSessionForm()
+        # form = StartParkingSessionForm()
+        form = StartParkingSessionForm(user=request.user)
 
     return render(request, 'vehicle_entry.html', {'form': form})
 
 
 def end_parking_session(request):
     if request.method == "POST":
-        form = EndParkingSessionForm(request.POST)
+        form = EndParkingSessionForm(request.POST, user=request.user)
         if form.is_valid():
             vehicle = form.cleaned_data['vehicle']
             exit_time = form.cleaned_data['exit_time']
 
             session = ParkingSession.objects.filter(vehicle=vehicle, exit_time__isnull=True).first()
+            exit_parking_id = session.id
 
             if session:
                 session.exit_time = exit_time
@@ -288,11 +305,41 @@ def end_parking_session(request):
                 if not (vehicle.subscription_end_date and vehicle.subscription_end_date >= exit_time.date()):
                     vehicle.parking_spot = None
 
+                    user_profile = UserProfile.objects.get(user_id=vehicle.owner_id)
+                    parking_rate = ParkingRate.objects.get(vehicle_type=vehicle.vehicle_type)
+                    session = ParkingSession.objects.filter(id=exit_parking_id).first()
+                    if vehicle.is_disabled:
+                        rate = parking_rate.disabled_rate
+                        transaction_type_text = 'DISABLED_FEE'
+                        description_text = 'Disabled'
+                    else:
+                        rate = parking_rate.rate_per_hour
+                        transaction_type_text = 'HOURLY_FEE'
+                        description_text='Hourly'
+
+                    # Переводим длительность в часы
+                    total_hours = Decimal(session.total_duration.total_seconds()) / Decimal(3600)
+                    # Затем умножаем количество часов на ставку
+                    to_pay = total_hours * rate
+                    to_pay = round(to_pay, 2)
+                    Transaction.objects.create(
+                        user_id=vehicle.owner_id,
+                        transaction_type=transaction_type_text,
+                        amount=rate,
+                        description=f"{description_text} fee for vehicle {vehicle.license_plate}, Price - {rate}, "
+                                    f"entry - {session.entry_time} -- exit - {session.exit_time}"
+                                    f" -- Parking time = {session.total_duration}. To pay = {to_pay} USD"
+                    )
+                    # Deduct money from the user's balance
+                    user_profile.monetary_limit -= to_pay
+                    user_profile.save()
+
                 vehicle.save()
 
             return redirect('parking_status')
     else:
-        form = EndParkingSessionForm()
+        # form = EndParkingSessionForm()
+        form = EndParkingSessionForm(user=request.user)
 
     return render(request, 'vehicle_exit.html', {'form': form})
 
@@ -311,11 +358,16 @@ def add_transaction(request):
             start_date = form.cleaned_data['start_date']
             # is_disabled = form.cleaned_data['is_disabled']
             parking_spot = form.cleaned_data['parking_spot']
+            if not parking_spot:
+                parking_spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
+                if not parking_spot:
+                    messages.error(request, "Свободных мест нет.")
+                    return redirect('add_transaction')
 
             # Check if the vehicle is blocked
             if vehicle.is_blocked:
                 messages.error(request, "Выбранное авто заблокировано.")
-                return redirect('add-transaction')
+                return redirect('add_transaction')
 
             # Get user profile and check balance
             user_profile = UserProfile.objects.get(user=request.user)
@@ -324,19 +376,20 @@ def add_transaction(request):
 
             if user_profile.monetary_limit < rate:
                 messages.error(request, "Пополните баланс.")
-                return redirect('add-transaction')
+                return redirect('add_transaction')
 
             if parking_spot:
                 # Save parking spot and subscription end date to vehicle
                 vehicle.parking_spot = parking_spot
-                vehicle.subscription_end_date = start_date + timedelta(days=30)
-                vehicle.save()
+                if vehicle.subscription_end_date:
+                    if vehicle.subscription_end_date >= start_date:
+                        vehicle.subscription_end_date += timedelta(days=30)
+                    else:
+                        vehicle.subscription_end_date = start_date + timedelta(days=30)
+                else:
+                    vehicle.subscription_end_date = start_date + timedelta(days=30)
 
-                # Mark the parking spot as occupied
-                parking_spot.is_occupied = True
-                parking_spot.occupied_by = vehicle
-                parking_spot.occupied_since = start_date
-                parking_spot.save()
+                vehicle.save()
 
             # Create a new transaction
             # if not is_blocked:
@@ -355,10 +408,111 @@ def add_transaction(request):
             #     vehicle.is_disabled = True
             #     vehicle.save()
 
-            messages.success(request, "Абонемент успешно оформлен.")
-            return redirect('home')
+            messages.success(request, "Subscription completed successfully.")
+            return redirect('transaction_history')
 
     else:
         form = TransactionForm(user=request.user)
 
     return render(request, 'add_transaction.html', {'form': form})
+
+
+@login_required
+def upload_and_find_vehicle(request):
+    if request.method == 'POST':
+        form = ParkingImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            image_file = form.cleaned_data['image']
+            nparr = np.frombuffer(image_file.read(), np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Распознавание номерного знака
+            license_plates, annotated_image = detect_and_recognize_license_plates(img)
+            combined_plates = ', '.join(license_plates)
+
+            result = None
+            if license_plates:
+                cleaned_query_plate = license_plates[0].upper().replace(" ", "").replace("-", "")
+
+                # Очистка и форматирование номеров в базе данных
+                cleaned_vehicles = Vehicle.objects.annotate(
+                    cleaned_license_plate=Trim(
+                        Replace(Replace(Upper('license_plate'), Value(" "), Value("")), Value("-"), Value("")))
+                ).select_related('owner')
+
+                # Извлекаем все номера из базы данных и чистим их
+                all_plates = Vehicle.objects.values_list('license_plate', flat=True)
+                cleaned_plates = [plate.upper().replace(" ", "").replace("-", "") for plate in all_plates]
+
+                # Используем fuzzywuzzy для поиска наиболее похожего номера
+                best_match = process.extractOne(cleaned_query_plate, cleaned_plates)
+
+                if best_match and best_match[1] > 40:  # Если совпадение больше 40%
+                    matching_vehicles = cleaned_vehicles.filter(cleaned_license_plate=best_match[0])
+
+                    if matching_vehicles.exists():
+                        vehicle = matching_vehicles.first()  # Берем первый найденный
+                        result = {
+                            'license_plate': vehicle.license_plate,
+                            'vehicle_type': vehicle.vehicle_type,
+                            'owner_id': vehicle.owner.id,
+                            'username': vehicle.owner.username,
+                            'first_name': vehicle.owner.first_name,
+                            'last_name': vehicle.owner.last_name,
+                        }
+                    else:
+                        result = None
+                else:
+                    result = None
+
+            # Кодирование изображения в Base64
+            _, buffer = cv2.imencode('.jpg', annotated_image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+            return render(request, 'upload_and_find_vehicle.html', {
+                'license_plate': combined_plates,
+                'result': result,
+                'annotated_image_base64': image_base64
+            })
+    else:
+        form = ParkingImageForm()
+
+    return render(request, 'upload_and_find_vehicle.html', {'form': form})
+
+
+# @cache_page(60 * 15)
+def capture_image(request):
+    if request.method == 'POST':
+        # Відкриття вебкамери
+        cap = cv2.VideoCapture(0)
+        # # "Прогреваем" камеру, чтобы снимок не был тёмным
+        # for i in range(30):
+        #     cap.read()
+        if not cap.isOpened():
+            return render(request, 'capture_image.html', {'error': 'Could not access the camera.'})
+
+        # Захоплення кадру
+        ret, frame = cap.read()
+        cap.release()
+
+        if not ret:
+            return render(request, 'capture_image.html', {'error': 'Could not capture image.'})
+
+        # Обробка зображення для розпізнавання номерного знака
+        license_plates, annotated_image = detect_and_recognize_license_plates(frame)
+        combined_plates = ', '.join(license_plates)
+
+        # Кодування зображення у формат Base64 для виведення на сторінці
+        _, buffer = cv2.imencode('.jpg', annotated_image)
+        image_base64 = base64.b64encode(buffer).decode('utf-8')
+
+        return render(request, 'capture_image.html', {
+            'license_plate': combined_plates,
+            'annotated_image_base64': image_base64
+        })
+
+    return render(request, 'capture_image.html')
+
+def about_us(request):
+    return render(request, 'about_us.html')
+

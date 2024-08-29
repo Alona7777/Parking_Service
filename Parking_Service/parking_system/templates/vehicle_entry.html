@@ -1,10 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Въезд автомобиля</h1>
+<style>
+    .table-container {
+        position: relative;
+        top: 0px;
+        left: 50px;
+        max-width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(3px);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        border: 1px solid rgba(221, 221, 221, 0.5);
+        padding: 8px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    .table th {
+        background-color: rgba(200, 200, 200, 0.4);
+    }
+
+</style>
+<div class="table-container">
+    <h1>Vehicle entry</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Начать парковочную сессию</button>
+        <button type="submit" class="btn btn-primary w-100">Start a parking session</button>
     </form>
+</div>
 {% endblock %}

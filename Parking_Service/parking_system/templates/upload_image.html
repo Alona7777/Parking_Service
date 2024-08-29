@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Upload Image for License Plate Recognition</h2>
+    <h2>Upload an image and find a car by number</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3">
@@ -13,12 +13,12 @@
 
     {% if license_plate %}
         <div class="alert alert-success mt-3" role="alert">
-            Recognized License Plate: {{ license_plate }}
+            Recognized license plate: {{ license_plate }}
         </div>
     {% endif %}
 
     {% if annotated_image_base64 %}
-        <h3>Annotated Image:</h3>
-        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Annotated Image" class="img-fluid mt-3">
+        <h3>Annotated image:</h3>
+        <img src="data:image/jpeg;base64,{{ annotated_image_base64 }}" alt="Annotated image" class="img-fluid mt-3">
     {% endif %}
 {% endblock %}

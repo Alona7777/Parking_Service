@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Выезд автомобиля</h1>
+    <h1>Vehicle EXIT</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Завершить сессию</button>
+        <button type="submit">End session</button>
     </form>
 {% endblock %}
