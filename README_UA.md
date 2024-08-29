@@ -43,13 +43,27 @@
 
 ## Встановлення віртуального середовища
 
-### 1. Встановлення через Conda
+
+### 1. Встановлення через Docker
+Цей проект можна легко налаштувати за допомогою Docker. Виконайте наступні кроки, щоб запустити додаток:
+
+   - 1. **Переконайтеся, що у вас встановлені Docker та Docker Compose на вашій системі.**
+   - 2. **Клонування репозиторію**
+
+      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```cd``` your-repo-name
+
+   - 3. **Збірка та запуск Docker-контейнерів**
+
+      ```docker-compose up --build -d```
+
+
+### 2. Встановлення через Conda
 
    - 1. **Клонування репозиторію**
 
-      ```bash
-      git clone https://github.com/yourusername/parking-management-system.git
-      cd parking-management-system
+      ```git clone https://alona7777.github.io/Final_project/```
+      ```cd``` your-repo-name
 
 
    - 2. **Створення та активація віртуального середовища**
@@ -61,7 +75,7 @@
       - ```pip install -r requirements.txt```
 
 
-### 2. Встановлення через Poetry
+### 3. Встановлення через Poetry
    - 1. **Встановлення Poetry (якщо ще не встановлений)**
 
       - На системах Linux і macOS:
@@ -90,7 +104,7 @@
       ```poetry shell```
 
 
-### 3. Встановлення через VENV
+### 4. Встановлення через VENV
 
    - 1. ```python3 -m venv venv```
    - 2. ```source venv/bin/activate```
@@ -127,7 +141,7 @@
 
     ```cd``` та ваш шлях до діректорії ```parking_system```
 
-2. Виконайте заруск сервера: 
+2. Виконайте запуск сервера: 
 
    - ```python manage.py runserver```
 

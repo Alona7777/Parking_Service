@@ -40,14 +40,26 @@ The combination of these two technologies ensures high accuracy and efficiency i
 
 ## Setting Up Virtual Environment
 
-### 1. Installation via Conda
+
+### 1. Installation via Docker
+This project can be easily set up using Docker. Follow these steps to run the application:
+
+   1. **Ensure that Docker and Docker Compose are installed on your system.**
+
+   2. **Clone the repository**
+      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```cd``` your-repo-name
+
+   3. **Build and run Docker containers**
+      ```docker-compose up --build -d```
+
+
+### 2. Installation via Conda
 
    - 1. **Clone the repository**
 
-      ```bash
-      git clone https://github.com/yourusername/parking-management-system.git
-      cd parking-management-system
-      ```
+      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```cd``` your-repo-name
 
    - 2. **Create and activate virtual environment**
 
@@ -57,7 +69,7 @@ The combination of these two technologies ensures high accuracy and efficiency i
       - ```conda activate parking-system```
       - ```pip install -r requirements.txt```
 
-### 2. Installation via Poetry
+### 3. Installation via Poetry
    - 1. **Install Poetry (if not already installed)**
 
       - On Linux and macOS:
@@ -74,8 +86,8 @@ The combination of these two technologies ensures high accuracy and efficiency i
 
    - 2. **Clone the repository**
 
-      - ```git clone https://github.com/yourusername/parking-management-system.git```
-      - ```cd parking-management-system```
+      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```cd``` your-repo-name
 
    - 3. **Install dependencies via Poetry**
 
@@ -85,7 +97,7 @@ The combination of these two technologies ensures high accuracy and efficiency i
 
       ```poetry shell```
 
-### 3. Installation via VENV
+### 4. Installation via VENV
 
    - 1. ```python3 -m venv venv```
    - 2. ```source venv/bin/activate```
