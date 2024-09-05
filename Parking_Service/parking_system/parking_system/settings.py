@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.koyeb.app', '.localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -133,11 +133,12 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/logout'
 LOGOUT_REDIRECT_URL = '/'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
