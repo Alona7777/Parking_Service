@@ -241,6 +241,10 @@ def start_parking_session(request):
             entry_time = form.cleaned_data['entry_time']
             user_profile = UserProfile.objects.get(user_id=vehicle.owner_id)
 
+            if vehicle.is_blocked == True:
+                messages.error(request, "You are baned.")
+                return redirect('vehicle_entry')
+
             if user_profile.monetary_limit <= 0:
                 messages.error(request, "Top up your balance.")
                 return redirect('vehicle_entry')
@@ -249,15 +253,31 @@ def start_parking_session(request):
             if vehicle.subscription_end_date and vehicle.subscription_end_date >= timezone.now().date():
                 if vehicle.parking_spot_id:
                     spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                    if spot.is_occupied == True:
+                        messages.error(request, "You have already entered the parking lot!")
+                        return redirect('vehicle_entry')
+                
                 else:
                     spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
 
             elif vehicle.is_disabled:
-                spot = ParkingSpot.objects.filter(spot_type='DISABLED', is_occupied=False).first()
-                if not spot:
-                    spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+                if vehicle.parking_spot_id:
+                    spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                    if spot.is_occupied == True:
+                        messages.error(request, "You have already entered the parking lot!")
+                        return redirect('vehicle_entry')
+                else: 
+                    spot = ParkingSpot.objects.filter(spot_type='DISABLED', is_occupied=False).first()
+                    if not spot:
+                        spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
             else:
-                spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+                if vehicle.parking_spot_id:
+                    spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                    if spot.is_occupied == True:
+                        messages.error(request, "You have already entered the parking lot!")
+                        return redirect('vehicle_entry')
+                else:        
+                    spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
 
             if spot:
                 spot.is_occupied = True
@@ -361,12 +381,12 @@ def add_transaction(request):
             if not parking_spot:
                 parking_spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
                 if not parking_spot:
-                    messages.error(request, "Свободных мест нет.")
+                    messages.error(request, "No vacant tables.")
                     return redirect('add_transaction')
 
             # Check if the vehicle is blocked
             if vehicle.is_blocked:
-                messages.error(request, "Выбранное авто заблокировано.")
+                messages.error(request, "The selected car is blocked.")
                 return redirect('add_transaction')
 
             # Get user profile and check balance
@@ -375,7 +395,7 @@ def add_transaction(request):
             rate = parking_rate.rental_rate
 
             if user_profile.monetary_limit < rate:
-                messages.error(request, "Пополните баланс.")
+                messages.error(request, "Top up your balance.")
                 return redirect('add_transaction')
 
             if parking_spot:
@@ -551,25 +571,46 @@ def start_parking_session_image(request):
                     if matching_vehicles.exists():
                         vehicle = matching_vehicles.first()
 
+                        if vehicle.is_blocked == True:
+                            messages.error(request, "You are baned.")
+                            return redirect('start_parking_session_image')
+
+
                         # Проверка денежного лимита
                         user_profile = UserProfile.objects.get(user_id=vehicle.owner_id)
                         if user_profile.monetary_limit <= 0:
-                            messages.error(request, "Пополните баланс.")
+                            messages.error(request, "Top up your balance.")
                             return redirect('start_parking_session_image')
 
                         # Логика для поиска парковочного места
                         if vehicle.subscription_end_date and vehicle.subscription_end_date >= timezone.now().date():
                             if vehicle.parking_spot_id:
                                 spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                                if spot.is_occupied == True:
+                                    messages.error(request, "You have already entered the parking lot!")
+                                    return redirect('start_parking_session_image')
                             else:
                                 spot = ParkingSpot.objects.filter(spot_type='SUBSCRIPTION', is_occupied=False).first()
 
+
                         elif vehicle.is_disabled:
-                            spot = ParkingSpot.objects.filter(spot_type='DISABLED', is_occupied=False).first()
-                            if not spot:
-                                spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+                            if vehicle.parking_spot_id:
+                                spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                                if spot.is_occupied == True:
+                                    messages.error(request, "You have already entered the parking lot!")
+                                    return redirect('start_parking_session_image')
+                            else: 
+                                spot = ParkingSpot.objects.filter(spot_type='DISABLED', is_occupied=False).first()
+                                if not spot:
+                                    spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
                         else:
-                            spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
+                            if vehicle.parking_spot_id:
+                                spot = ParkingSpot.objects.filter(id=vehicle.parking_spot_id).first()
+                                if spot.is_occupied == True:
+                                    messages.error(request, "You have already entered the parking lot!")
+                                    return redirect('start_parking_session_image')
+                            else:        
+                                spot = ParkingSpot.objects.filter(spot_type='HOURLY', is_occupied=False).first()
 
                         if spot:
                             spot.is_occupied = True
