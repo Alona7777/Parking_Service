@@ -36,6 +36,15 @@ The combination of these two technologies ensures high accuracy and efficiency i
 - PaddlePaddle (for license plate recognition)
 - Other dependencies listed in `pyproject.toml` or `requirements.txt`
 
+### Important Information for User with OS-Windows 10 and upper!!!
+    for correct installation, and for the correct operation of image recognition, 
+    you must install the following libraries:
+    Torch==2.2.2
+    torchvision==0.15.1
+    torchaudio==2.0.1 
+
+    Having previously removed the ones already installed by default.
+
 # Application Setup
 
 ## Setting Up Virtual Environment
