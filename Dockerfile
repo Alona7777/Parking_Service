@@ -24,7 +24,7 @@ WORKDIR /app/Parking_Service/parking_system
 RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
 
-EXPOSE 8000
+EXPOSE 8000:80
 
 CMD ["gunicorn", "parking_system.wsgi:application", "--bind", "0.0.0.0:8000"]
 
