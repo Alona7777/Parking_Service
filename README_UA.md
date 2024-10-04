@@ -50,7 +50,7 @@
    - 1. **Переконайтеся, що у вас встановлені Docker та Docker Compose на вашій системі.**
    - 2. **Клонування репозиторію**
 
-      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```git clone https://github.com/Alona7777/Parking_Service.git```
       ```cd``` your-repo-name
 
    - 3. **Збірка та запуск Docker-контейнерів**
@@ -62,7 +62,7 @@
 
    - 1. **Клонування репозиторію**
 
-      ```git clone https://alona7777.github.io/Final_project/```
+      ```git clone https://github.com/Alona7777/Parking_Service.git```
       ```cd``` your-repo-name
 
 
@@ -92,7 +92,7 @@
 
    - 2. **Клонування репозиторію**
 
-      - ```git clone https://github.com/yourusername/parking-management-system.git```
+      - ```git clone https://github.com/Alona7777/Parking_Service.git```
       - ```cd parking-management-system```
 
    - 3. **Встановлення залежностей через Poetry**
