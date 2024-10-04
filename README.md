@@ -56,7 +56,7 @@ This project can be easily set up using Docker. Follow these steps to run the ap
    1. **Ensure that Docker and Docker Compose are installed on your system.**
 
    2. **Clone the repository**
-      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```git clone https://github.com/Alona7777/Parking_Service.git```
       ```cd``` your-repo-name
 
    3. **Build and run Docker containers**
@@ -67,7 +67,7 @@ This project can be easily set up using Docker. Follow these steps to run the ap
 
    - 1. **Clone the repository**
 
-      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```git clone https://github.com/Alona7777/Parking_Service.git```
       ```cd``` your-repo-name
 
    - 2. **Create and activate virtual environment**
@@ -95,7 +95,7 @@ This project can be easily set up using Docker. Follow these steps to run the ap
 
    - 2. **Clone the repository**
 
-      ```git clone https://github.com/your-username/your-repo-name.git```
+      ```git clone https://github.com/Alona7777/Parking_Service.git```
       ```cd``` your-repo-name
 
    - 3. **Install dependencies via Poetry**
