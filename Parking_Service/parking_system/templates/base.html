@@ -44,8 +44,7 @@
         </div>
         <section>
             <ul>
-                {% if user.is_superuser %}
-        
+                {% if user.is_superuser %} 
                 <li>
                     <a href="{% url 'upload-and-find-vehicle' %}">
                         Upload Image vehicle
@@ -54,9 +53,7 @@
                         <span></span>
                         <span></span>
                     </a>
-
                 </li>
-
                 <li>
                     <a href="{% url 'vehicle_list' %}">
                         Vehicles
@@ -128,15 +125,6 @@
                     
                 </li>
                 <li>
-                    <a href="{% url 'capture_image' %}">
-                        Capture Image
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </a>
-                </li>
-                <li>
                     <a href="{% url 'parking_sessions' %}">
                         Parking Sessions
                         <span></span>
@@ -145,6 +133,15 @@
                         <span></span>
                     </a>
                     
+                </li>
+                <li>
+                    <a href="{% url 'capture_image' %}">
+                        Capture Image
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </a>
                 </li>
                 {% endif %}
 
@@ -178,7 +175,7 @@
                 </li>
                 <li>
                     <a href="{% url 'add_transaction' %}">
-                        Add Transaction
+                        Buy a subscription
                         <span></span>
                         <span></span>
                         <span></span>
@@ -186,14 +183,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'upload_image' %}">
-                        Upload Image
+                    <a href="{% url 'upload-and-find-vehicle' %}">
+                        Upload Image vehicle
                         <span></span>
                         <span></span>
                         <span></span>
                         <span></span>
                     </a>
-                    
                 </li>
             <li>
                 <a href="{% url 'start_parking_session_image' %}">
