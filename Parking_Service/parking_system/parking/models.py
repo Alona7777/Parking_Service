@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    monetary_limit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Лимит средств
+    monetary_limit = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  
 
     def __str__(self):
         return self.user.username
@@ -22,8 +22,8 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    timestamp = models.DateTimeField(auto_now_add=True)  # Время транзакции
-    description = models.TextField(blank=True, null=True)  # Описание транзакции
+    timestamp = models.DateTimeField(auto_now_add=True) 
+    description = models.TextField(blank=True, null=True)  
 
     def __str__(self):
         return f"{self.user.username} - {self.transaction_type} - {self.amount} at {self.timestamp}"
@@ -57,10 +57,10 @@ class Vehicle(models.Model):
     license_plate = models.CharField(max_length=12, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=20, choices=VEHICLE_TYPE_CHOICES)
-    is_blocked = models.BooleanField(default=False)   # Поле для блокировки авто
+    is_blocked = models.BooleanField(default=False)   
     parking_spot = models.ForeignKey(ParkingSpot, null=True, blank=True, on_delete=models.SET_NULL)
     subscription_end_date = models.DateField(null=True, blank=True)
-    is_disabled = models.BooleanField(default=False)  # Флаг принадлежности инвалиду
+    is_disabled = models.BooleanField(default=False)  
     
 
     def __str__(self):
@@ -106,8 +106,8 @@ class ParkingRate(models.Model):
     ])
 
     rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
-    rental_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  # Цена аренды стоянки
-    disabled_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  # Цена для инвалидов
+    rental_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  
+    disabled_rate = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))  
 
     def __str__(self):
         return f"{self.get_vehicle_type_display()} - {self.rate_per_hour} per hour, " \
