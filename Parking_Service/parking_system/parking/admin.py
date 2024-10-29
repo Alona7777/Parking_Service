@@ -16,7 +16,7 @@ class ParkingSpotAdmin(admin.ModelAdmin):
 @admin.register(ParkingSession)
 class ParkingSessionAdmin(admin.ModelAdmin):
     list_display = ('vehicle', 'entry_time', 'exit_time', 'total_duration', 'parking_spot')
-    fields = ('vehicle', 'entry_time', 'exit_time', 'total_duration', 'parking_spot')  # Если поля не отображаются
+    fields = ('vehicle', 'entry_time', 'exit_time', 'total_duration', 'parking_spot')  # If the fields are not displayed
 
 @admin.register(ParkingRate)
 class ParkingRateAdmin(admin.ModelAdmin):
